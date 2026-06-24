@@ -1,1 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Customers | INI Logistics</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+<div class="logo">
+<img src="images/logo.png">
+</div>
+
+<ul class="nav-links">
+
+<li><a href="dashboard.html">Dashboard</a></li>
+<li><a href="customers.html">Customers</a></li>
+<li><a href="reports.html">Reports</a></li>
+
+</ul>
+
+</nav>
+
+<section class="shipment-section">
+
+<h1>Customer Management</h1>
+
+<div class="shipment-form">
+
+<input
+type="text"
+id="customerName"
+placeholder="Customer Name">
+
+<input
+type="email"
+id="customerEmail"
+placeholder="Email">
+
+<input
+type="text"
+id="customerPhone"
+placeholder="Phone">
+
+<button onclick="saveCustomer()">
+
+Add Customer
+
+</button>
+
+</div>
+
+</section>
+
+<section class="shipment-list-section">
+
+    <input
+type="text"
+id="customerSearch"
+placeholder="Search Customer"
+onkeyup="searchCustomer()">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="customerTable">
+
+</tbody>
+
+</table>
+
+</section>
+
+<script src="js/customers.js"></script>
+
+<script>
+loadCustomers();
+</script>
+
+</body>
+
+</html>
