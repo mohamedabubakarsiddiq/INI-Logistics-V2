@@ -1,1 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Shipments</title>
+
+<link rel="stylesheet"
+      href="css/style.css">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+<div class="logo">
+<img src="images/logo.png"
+     alt="INI Logistics">
+</div>
+
+<ul class="nav-links">
+
+<li><a href="dashboard.html">Dashboard</a></li>
+<li><a href="shipment.html">New Shipment</a></li>
+<li><a href="shipments.html">Shipments</a></li>
+<li><a href="tracking.html">Tracking</a></li>
+<li><a href="profile.html">Profile</a></li>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="reports.html">Reports</a></li>
+<li>
+<a href="customers.html">
+Customers
+</a>
+</li>
+<li>
+<a href="#"
+onclick="logout()">
+Logout
+</a>
+</li>
+
+</ul>
+
+</nav>
+
+<section class="shipment-list-section">
+
+<h1>Shipment Management</h1>
+
+<input
+type="text"
+id="searchBox"
+placeholder="Search Shipment..."
+onkeyup="searchShipment()">
+
+<select id="statusFilter" onchange="filterShipments()">
+
+<option value="">All Status</option>
+
+<option value="Shipment Created">Shipment Created</option>
+
+<option value="Picked Up">Picked Up</option>
+
+<option value="In Transit">In Transit</option>
+
+<option value="Out For Delivery">Out For Delivery</option>
+
+<option value="Delivered">Delivered</option>
+
+</select>
+
+<button onclick="exportCSV()">
+Export CSV
+</button>
+
+<div class="shipment-summary">
+
+<h3>
+Total Shipments:
+<span id="shipmentCount">
+0
+</span>
+</h3>
+
+</div>
+
+<button onclick="exportCSV()" class="export-btn">
+📥 Export Shipments
+</button>
+
+<button
+class="refresh-btn"
+onclick="exportToCSV()">
+
+📊 Export Excel
+
+</button>
+
+<table>
+
+<thead>
+
+<tr>
+<th>ID</th>
+<th>Sender</th>
+<th>Receiver</th>
+<th>Origin</th>
+<th>Destination</th>
+<th>Package</th>
+<th>Weight</th>
+<th>Priority</th>
+<th>Cost</th>
+<th>ETA</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+
+</thead>
+
+<tbody id="shipmentTable">
+
+</tbody>
+
+</table>
+
+</section>
+
+
+<script src="js/main.js"></script>
+<script src="js/shipments.js"></script>
+
+<script>
+checkLogin();
+loadShipments();
+</script>
+
+<div id="toast"></div>
+
+<footer class="footer">
+
+<div class="footer-content">
+
+<div>
+<h3>INI Logistics</h3>
+<p>Delivering Excellence Worldwide</p>
+</div>
+
+<div>
+<h4>Quick Links</h4>
+<ul>
+<li><a href="dashboard.html">Dashboard</a></li>
+<li><a href="shipment.html">Shipments</a></li>
+<li><a href="tracking.html">Tracking</a></li>
+</ul>
+</div>
+
+<div>
+<h4>Contact</h4>
+<p>support@inilogistics.com</p>
+<p>+91 98407 03914</p>
+</div>
+
+</div>
+
+<div class="copyright">
+© 2026 INI Logistics. All Rights Reserved.
+</div>
+
+</body>
+
+</html>
 
