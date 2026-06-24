@@ -1,1 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>INI Logistics</title>
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<!-- Navbar -->
+
+<nav class="navbar">
+
+<div class="logo">
+
+<img src="images/logo.png" alt="INI Logistics">
+
+</div>
+
+<div class="hamburger">
+
+☰
+
+</div>
+
+<ul class="nav-links">
+
+<li><a href="#">Home</a></li>
+<li><a href="#services">Services</a></li>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="faq.html">FAQ</a></li>
+
+<li>
+<a href="login.html" class="login-btn">
+Login
+</a>
+</li>
+
+</ul>
+
+</nav>
+
+<!-- Hero Section -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1>Delivering Excellence Worldwide</h1>
+
+        <p>
+            Reliable logistics and supply chain solutions designed to move
+            your business forward. Track, manage, and deliver shipments
+            with confidence and transparency.
+        </p>
+
+        <p class="hero-tagline">
+            Trusted Logistics Partner Across India & Worldwide
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="tracking.html" class="btn-primary">
+                Track Shipment
+            </a>
+
+            <a href="login.html" class="btn-secondary">
+                Login Dashboard
+            </a>
+
+            <a href="contact.html" class="btn-secondary">
+                Contact Us
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="trust-bar">
+
+<div class="trust-item">
+🚚 Fast Delivery
+</div>
+
+<div class="trust-item">
+🌍 Global Coverage
+</div>
+
+<div class="trust-item">
+📦 Real-Time Tracking
+</div>
+
+<div class="trust-item">
+🕒 24/7 Support
+</div>
+
+</section>
+
+<section class="business-stats">
+
+<div class="stat-box">
+<h2>500+</h2>
+<p>Shipments Delivered</p>
+</div>
+
+<div class="stat-box">
+<h2>100+</h2>
+<p>Clients Served</p>
+</div>
+
+<div class="stat-box">
+<h2>20+</h2>
+<p>Countries Covered</p>
+</div>
+
+<div class="stat-box">
+<h2>99%</h2>
+<p>On-Time Delivery</p>
+</div>
+
+</section>
+
+<!-- Tracking Section -->
+
+<section class="tracking-card" id="tracking">
+
+<div class="tracking-left">
+
+<h2>Track Shipment</h2>
+
+<p>
+Real-time tracking updates.
+</p>
+
+
+</div>
+
+<div class="tracking-right">
+
+<input
+type="text"
+id="trackingNumber"
+placeholder="Tracking Number">
+
+<button onclick="trackHomeShipment()">
+Track Now
+</button>
+
+</div>
+
+</section>
+
+<section class="services hidden" id="services">
+
+    <div class="section-title">
+        <h2>Our Services</h2>
+        <p>Comprehensive logistics solutions for every business.</p>
+    </div>
+
+    <div class="service-grid">
+
+        <div class="service-card">
+            <div class="icon">🚚</div>
+            <h3>Road Freight</h3>
+            <p>Fast and secure transportation across cities and states.</p>
+        </div>
+
+        <div class="service-card">
+            <div class="icon">✈️</div>
+            <h3>Air Freight</h3>
+            <p>Express worldwide delivery with speed and reliability.</p>
+        </div>
+
+        <div class="service-card">
+            <div class="icon">🚢</div>
+            <h3>Ocean Freight</h3>
+            <p>Cost-effective shipping solutions for global trade.</p>
+        </div>
+
+    </div>
+
+</section>
+<section class="stats">
+
+    <div class="stat-card">
+        <h2 class="counter" data-target="500">0</h2>
+        <p>Shipments Delivered</p>
+    </div>
+
+    <div class="stat-card">
+        <h2 class="counter" data-target="100">0</h2>
+        <p>Clients Served</p>
+    </div>
+
+    <div class="stat-card">
+        <h2 class="counter" data-target="99">0</h2>
+        <p>On-Time Delivery</p>
+    </div>
+
+    <div class="stat-card">
+       <h2 class="counter" data-target="20">0</h2>
+        <p>Countries Covered</p>
+    </div>
+
+</section>
+
+<section class="about-us">
+
+    <div class="section-title">
+        <h2>About INI Logistics</h2>
+    </div>
+
+    <p>
+        INI Logistics is committed to providing reliable, secure, and
+        efficient logistics services across domestic and international
+        markets. Our advanced shipment management system enables
+        real-time tracking, streamlined operations, and exceptional
+        customer service.
+    </p>
+
+</section>
+
+<section class="why-us hidden">
+
+    <div class="section-title">
+        <h2>Why Choose INI Logistics?</h2>
+    </div>
+
+    <div class="features">
+
+        <div class="feature">
+            <h3>Reliable</h3>
+            <p>Safe and secure shipment handling.</p>
+        </div>
+
+        <div class="feature">
+            <h3>Global Network</h3>
+            <p>Worldwide transportation solutions.</p>
+        </div>
+
+        <div class="feature">
+            <h3>Fast Delivery</h3>
+            <p>On-time shipment execution.</p>
+        </div>
+
+        <div class="feature">
+            <h3>24/7 Support</h3>
+            <p>Customer assistance whenever needed.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="partners">
+
+    <div class="section-title">
+        <h2>Trusted By Businesses Worldwide</h2>
+    </div>
+
+    <div class="partner-grid">
+
+        <div class="partner-card">Global Traders</div>
+        <div class="partner-card">Express Retail</div>
+        <div class="partner-card">Smart Electronics</div>
+        <div class="partner-card">Prime Industries</div>
+
+    </div>
+
+</section>
+
+<section class="testimonials hidden">
+
+<div class="section-title">
+<h2>What Our Clients Say</h2>
+</div>
+
+<div class="testimonial-container">
+
+<div class="testimonial active">
+<p>
+"Outstanding logistics service and on-time delivery."
+</p>
+<h4>John Smith</h4>
+</div>
+
+<div class="testimonial">
+<p>
+"Shipment tracking is accurate and easy to use."
+</p>
+<h4>Sarah Johnson</h4>
+</div>
+
+<div class="testimonial">
+<p>
+"Reliable partner for our international deliveries."
+</p>
+<h4>Michael Brown</h4>
+</div>
+
+</div>
+
+</section>
+
+<section class="cta-section">
+
+    <h2>Ready to Ship With Confidence?</h2>
+
+    <p>
+        Join hundreds of businesses that trust INI Logistics for
+        reliable transportation and shipment management solutions.
+    </p>
+
+   
+
+</section>
+
+
+<a href="tracking.html"
+class="floating-btn">
+
+🚚
+
+</a>
+
+
+
+<script src="js/main.js"></script>
+
+<div id="toast"></div>
+
+<footer class="footer">
+
+    <div class="footer-content">
+
+        <div>
+            <h3>INI Logistics</h3>
+            <p>Reliable • Global • Fast</p>
+        </div>
+
+        <div>
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="tracking.html">Tracking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4>Developer</h4>
+            <ul>
+                <li><a href="profile.html">About Developer</a></li>
+                <li><a href="profile.html">Portfolio</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4>Contact</h4>
+            <p>support@inilogistics.com</p>
+            <p>+91 98407 03914</p>
+        </div>
+
+    </div>
+
+    <div class="copyright">
+        © 2026 INI Logistics. All Rights Reserved.
+    </div>
+
+</footer>
+
+</body>
+
+</html>
 
