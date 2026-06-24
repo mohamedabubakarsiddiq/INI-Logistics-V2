@@ -1,1 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard | INI Logistics</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+    <div id="loader" class="loader"></div>
+
+<!-- Navbar -->
+
+<nav class="navbar">
+
+<div class="logo">
+<img src="images/logo.png" alt="INI Logistics">
+</div>
+
+<ul class="nav-links">
+<li><a href="dashboard.html">Dashboard</a></li>
+<li><a href="shipment.html">New Shipment</a></li>
+<li><a href="shipments.html">Shipments</a></li>
+<li><a href="tracking.html">Tracking</a></li>
+<li><a href="profile.html">Profile</a></li>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="reports.html">Reports</a></li>
+<li>
+<a href="customers.html">
+Customers
+</a>
+</li>
+<li><a href="#">🔔<span id="notifyCount">0</span></a></li>
+<li><a href="#" onclick="logout()">Logout</a></li>
+</ul>
+
+<button onclick="toggleTheme()">
+🌙
+</button>
+
+</nav>
+
+<!-- Dashboard Header -->
+
+<section class="dashboard-header">
+
+<h1>Dashboard</h1>
+
+<p id="welcomeMessage">
+Welcome Back, Admin
+</p>
+
+<button
+class="refresh-btn"
+onclick="location.reload()">
+
+🔄 Refresh
+
+</button>
+
+<p id="currentDate"></p>
+
+</section>
+
+<!-- KPI Cards -->
+
+<section class="dashboard-grid">
+
+<div class="dashboard-card">
+<h2 id="totalShipments">0</h2>
+<p>Total Shipments</p>
+</div>
+
+<div class="dashboard-card">
+
+<h2 id="totalCustomers">
+0
+</h2>
+
+<p>Total Customers</p>
+
+</div>
+
+<div class="dashboard-card">
+<h2 id="deliveredShipments">0</h2>
+<p>Delivered</p>
+</div>
+
+<div class="dashboard-card">
+<h2 id="transitShipments">0</h2>
+<p>In Transit</p>
+</div>
+
+<div class="dashboard-card">
+<h2 id="pendingShipments">0</h2>
+<p>Pending</p>
+</div>
+
+<div class="dashboard-card">
+
+<h2 id="deliveryRate">
+0%
+</h2>
+
+<p>Delivery Rate</p>
+
+</div>
+
+<div class="dashboard-card">
+
+<h2 id="totalRevenue">
+₹0
+</h2>
+
+<p>Total Revenue</p>
+
+</div>
+
+<canvas id="revenueChart"></canvas>
+
+</section>
+
+<section class="business-stats">
+
+<div class="stat-box">
+<h2>500+</h2>
+<p>Shipments Delivered</p>
+</div>
+
+<div class="stat-box">
+<h2>100+</h2>
+<p>Clients</p>
+</div>
+
+<div class="stat-box">
+<h2>20+</h2>
+<p>Countries</p>
+</div>
+
+<div class="stat-box">
+<h2>99%</h2>
+<p>Success Rate</p>
+</div>
+
+<div class="stat-box">
+<h2 id="totalCustomers"></h2>
+<p>Customers</p>
+</div>
+
+<div class="stat-box">
+<h2 id="totalRevenue"></h2>
+<p>Revenue</p>
+</div>
+
+<div class="stat-box">
+<h2 id="totalShipments"></h2>
+<p>Shipments</p>
+</div>
+
+</section>
+
+<section class="today-stats">
+
+<div class="dashboard-card">
+<h2 id="todayShipments">0</h2>
+<p>Created Today</p>
+</div>
+
+<div class="dashboard-card">
+<h2 id="todayDelivered">0</h2>
+<p>Delivered Today</p>
+</div>
+
+
+</section>
+
+<section class="quick-actions">
+
+<a href="shipment.html" class="action-card">
+➕ Create Shipment
+</a>
+
+<a href="shipments.html" class="action-card">
+📦 Manage Shipments
+</a>
+
+<a href="tracking.html" class="action-card">
+🚚 Track Shipment
+</a>
+
+<a href="reports.html"
+class="action-card">
+
+📊 Reports
+
+</a>
+
+</section>
+
+<!-- Analytics -->
+
+<section class="business-stats">
+
+<div class="stat-box">
+<h2>500+</h2>
+<p>Shipments Delivered</p>
+</div>
+
+<div class="stat-box">
+<h2>100+</h2>
+<p>Clients</p>
+</div>
+
+<div class="stat-box">
+<h2>20+</h2>
+<p>Countries</p>
+</div>
+
+<div class="stat-box">
+<h2>99%</h2>
+<p>Success Rate</p>
+</div>
+
+</section>
+
+<section class="analytics-section">
+
+<div class="chart-card">
+
+<h2>Shipment Analytics Overview</h2>
+
+<p>
+Live distribution of shipment statuses.
+</p>
+
+<canvas id="shipmentChart"></canvas>
+
+</div>
+
+</section>
+
+<section class="status-overview">
+
+<div class="status-card created">
+Shipment Created
+</div>
+
+<div class="status-card picked">
+Picked Up
+</div>
+
+<div class="status-card transit">
+In Transit
+</div>
+
+<div class="status-card delivery">
+Out For Delivery
+</div>
+
+<div class="status-card delivered">
+Delivered
+</div>
+
+</section>
+
+<!-- Recent Shipments -->
+
+<section class="recent-section">
+
+<h2>Recent Shipments</h2>
+
+<table>
+
+<thead>
+
+<tr>
+<th>ID</th>
+<th>Sender</th>
+<th>Receiver</th>
+<th>Destination</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="recentTable">
+
+</tbody>
+
+</table>
+
+
+
+</section>
+
+<script src="js/main.js"></script>
+<script src="js/dashboard.js"></script>
+
+<script>
+checkLogin();
+loadDashboard();
+</script>
+
+<div id="toast"></div>
+
+<footer class="footer">
+
+<div class="footer-content">
+
+<div>
+<h3>INI Logistics</h3>
+<p>Delivering Excellence Worldwide</p>
+</div>
+
+<div>
+<h4>Quick Links</h4>
+<ul>
+<li><a href="dashboard.html">Dashboard</a></li>
+<li><a href="shipments.html">Shipments</a></li>
+<li><a href="tracking.html">Tracking</a></li>
+</ul>
+</div>
+
+<div>
+<h4>Contact</h4>
+<p>support@inilogistics.com</p>
+<p>+91 98407 03914</p>
+</div>
+
+</div>
+
+<div class="copyright">
+© 2026 INI Logistics. All Rights Reserved.
+</div>
+
+</footer>
+
+</body>
+
+</html>
