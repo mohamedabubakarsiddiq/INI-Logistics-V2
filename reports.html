@@ -1,1 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Reports | INI Logistics</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+<div class="logo">
+<img src="images/logo.png" alt="INI Logistics">
+</div>
+
+<ul class="nav-links">
+<li><a href="dashboard.html">Dashboard</a></li>
+<li><a href="shipment.html">New Shipment</a></li>
+<li><a href="shipments.html">Shipments</a></li>
+<li><a href="tracking.html">Tracking</a></li>
+<li><a href="reports.html">Reports</a></li>
+<li><a href="profile.html">Profile</a></li>
+<li>
+<a href="customers.html">
+Customers
+</a>
+</li>
+</ul>
+
+</nav>
+
+<section class="report-header">
+
+<h1>Reports & Analytics</h1>
+
+<p>
+Business performance overview
+</p>
+
+</section>
+
+<section class="dashboard-grid">
+
+<div class="dashboard-card">
+<h2 id="totalReportsShipments">0</h2>
+<p>Total Shipments</p>
+</div>
+
+<div class="dashboard-card">
+<h2 id="deliveredReports">0</h2>
+<p>Delivered</p>
+</div>
+
+<div class="dashboard-card">
+<h2 id="transitReports">0</h2>
+<p>In Transit</p>
+</div>
+
+<div class="dashboard-card">
+<h2 id="revenueReports">₹0</h2>
+<p>Total Revenue</p>
+</div>
+
+</section>
+
+<section class="analytics-section">
+
+<div class="chart-card">
+
+<h2>Status Report</h2>
+
+<canvas id="reportChart"></canvas>
+
+</div>
+
+</section>
+
+<section class="recent-section">
+
+<button
+class="refresh-btn"
+onclick="downloadReport()">
+
+Download Report
+
+</button>
+
+</section>
+
+<script src="js/reports.js"></script>
+
+<script>
+loadReports();
+</script>
+
+</body>
+
+</html>
