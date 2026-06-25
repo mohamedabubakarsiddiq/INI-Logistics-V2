@@ -113,3 +113,8 @@ window.addEventListener("scroll", () => {
         }
     });
 });
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".hidden").forEach(el => {
+        el.classList.add("show");
+    });
+});
