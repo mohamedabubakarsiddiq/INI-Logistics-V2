@@ -106,31 +106,39 @@ Login
 
 <!-- Tracking Section -->
 
-<section class="tracking-card" id="tracking">
+<section class="tracking-section" id="tracking">
 
-<div class="tracking-left">
+    <div class="tracking-container">
 
-<h2>Track Shipment</h2>
+        <div class="tracking-header">
 
-<p>
-Real-time tracking updates.
-</p>
+            <div class="tracking-icon">
+                🚚
+            </div>
 
+            <div>
+                <h2>Track Your Shipment</h2>
+                <p>
+                    Enter your tracking number to get real-time delivery updates.
+                </p>
+            </div>
 
-</div>
+        </div>
 
-<div class="tracking-right">
+        <div class="tracking-form">
 
-<input
-type="text"
-id="trackingNumber"
-placeholder="Tracking Number">
+            <input
+                type="text"
+                id="trackingNumber"
+                placeholder="Enter Tracking Number (e.g. INI12345)">
 
-<button onclick="trackHomeShipment()">
-Track Now
-</button>
+            <button onclick="trackHomeShipment()">
+                Track Shipment
+            </button>
 
-</div>
+        </div>
+
+    </div>
 
 </section>
 
