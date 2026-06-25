@@ -1,4 +1,4 @@
-// js/script.js - consolidated and safer (patched)
+// js/script.js - consolidated, safer, with extra diagnostics
 (function () {
   'use strict';
 
@@ -17,6 +17,7 @@
     const dropdown = $id('customerSelect');
     if (!dropdown) return;
     const customers = JSON.parse(localStorage.getItem('customers') || '[]');
+    console.log(`loadCustomerDropdown: found ${customers.length} customers`);
     customers.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.name || c.id || c.email || c.name;
@@ -82,15 +83,22 @@
       currentLocation: $id('origin') ? $id('origin').value.trim() : ''
     };
 
+    console.log('saveShipmentHandler: built shipment object', shipment);
+
     const validationError = validateForm(shipment);
     if (validationError) {
+      console.warn('saveShipmentHandler: validation failed:', validationError);
       showMessage(validationError, false);
       return;
     }
 
+    console.log('saveShipmentHandler: validation passed');
+
     const shipments = JSON.parse(localStorage.getItem('shipments') || '[]');
     shipments.push(shipment);
     localStorage.setItem('shipments', JSON.stringify(shipments));
+
+    console.log('saveShipmentHandler: shipment saved, total shipments =', shipments.length);
 
     showMessage('✅ Shipment Created Successfully', true);
 
@@ -183,6 +191,7 @@
 
   // Wire up events on DOM ready
   document.addEventListener('DOMContentLoaded', function () {
+    console.log('script.js DOMContentLoaded');
     // Initialize page id & customers
     initializeShipmentPage();
 
@@ -191,12 +200,17 @@
 
     // Create button
     const createBtn = $id('createShipmentBtn');
-    if (createBtn) createBtn.addEventListener('click', saveShipmentHandler);
-    else console.log('createShipmentBtn not found on page');
+    if (createBtn) {
+      createBtn.addEventListener('click', saveShipmentHandler);
+      console.log('Bound saveShipmentHandler to #createShipmentBtn');
+    } else console.warn('createShipmentBtn not found on page');
 
     // Shipment table actions
     const shipmentTable = $id('shipmentTable');
-    if (shipmentTable) shipmentTable.addEventListener('click', tableActionHandler);
+    if (shipmentTable) {
+      shipmentTable.addEventListener('click', tableActionHandler);
+      console.log('Bound tableActionHandler to #shipmentTable');
+    } else console.log('No #shipmentTable on this page');
 
     // If page lists shipments, populate
     loadShipmentsTable();
