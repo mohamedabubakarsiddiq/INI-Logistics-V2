@@ -74,10 +74,6 @@ onkeyup="searchShipment()">
 
 </select>
 
-<button onclick="exportCSV()">
-Export CSV
-</button>
-
 <div class="shipment-summary">
 
 <h3>
@@ -90,12 +86,12 @@ Total Shipments:
 </div>
 
 <button onclick="exportCSV()" class="export-btn">
-📥 Export Shipments
+📥 Export CSV
 </button>
 
 <button
 class="refresh-btn"
-onclick="exportToCSV()">
+onclick="exportToExcel()">
 
 📊 Export Excel
 
@@ -154,7 +150,7 @@ loadShipments();
 <h4>Quick Links</h4>
 <ul>
 <li><a href="dashboard.html">Dashboard</a></li>
-<li><a href="shipment.html">Shipments</a></li>
+<li><a href="shipments.html">Shipments</a></li>
 <li><a href="tracking.html">Tracking</a></li>
 </ul>
 </div>
@@ -174,4 +170,3 @@ loadShipments();
 </body>
 
 </html>
-
