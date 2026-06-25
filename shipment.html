@@ -59,6 +59,11 @@ type="text"
 id="shipmentId"
 readonly>
 
+<label>Choose Customer</label>
+<select id="customerSelect">
+  <option value="">-- Select existing customer --</option>
+</select>
+
 <label>Sender Name</label>
 <input
 type="text"
@@ -140,6 +145,15 @@ placeholder="Shipping Cost">
 <option>Urgent</option>
 </select>
 
+<label>Status</label>
+<select id="status">
+  <option>Shipment Created</option>
+  <option>Picked Up</option>
+  <option>In Transit</option>
+  <option>Out For Delivery</option>
+  <option>Delivered</option>
+</select>
+
 <label>Special Instructions</label>
 
 <textarea
@@ -148,7 +162,7 @@ placeholder="Fragile, Handle With Care, etc.">
 </textarea>
 
 
-<button onclick="saveShipment()">
+<button id="createShipmentBtn">
 Create Shipment
 </button>
 
@@ -204,4 +218,3 @@ initializeShipmentPage();
 </body>
 
 </html>
-
