@@ -148,6 +148,26 @@ text-decoration:none;
 border-radius:6px;
 }
 
+.dashboard-card:nth-child(1){
+    border-top:4px solid #00b8b8;
+}
+
+.dashboard-card:nth-child(2){
+    border-top:4px solid #4caf50;
+}
+
+.dashboard-card:nth-child(3){
+    border-top:4px solid #2196f3;
+}
+
+.dashboard-card:nth-child(4){
+    border-top:4px solid #ff9800;
+}
+
+.dashboard-card:nth-child(5){
+    border-top:4px solid #f44336;
+}
+
 .dashboard-hero{
     background:linear-gradient(
         135deg,
@@ -655,6 +675,14 @@ padding:20px 8%;
 }
 
 .chart-card{
+    min-height:350px;
+}
+
+.chart-card canvas{
+    max-height:280px;
+}
+
+.chart-card{
 
 background:white;
 
@@ -664,6 +692,58 @@ border-radius:12px;
 
 box-shadow:
 0 5px 15px rgba(0,0,0,.1);
+}
+
+.recent-section table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.status{
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.action-card{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    min-height:80px;
+    font-size:16px;
+    font-weight:600;
+}
+
+.delivered{
+    background:#e8f5e9;
+    color:#2e7d32;
+}
+
+.transit{
+    background:#fff3e0;
+    color:#ef6c00;
+}
+
+.pending{
+    background:#ffebee;
+    color:#c62828;
+}
+
+.recent-section th{
+    background:#003366;
+    color:white;
+    padding:12px;
+}
+
+.recent-section td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+}
+
+.recent-section tr:hover{
+    background:#f5f7fa;
 }
 
 .recent-section{
