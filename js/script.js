@@ -102,9 +102,10 @@
 
     showMessage('✅ Shipment Created Successfully', true);
 
-    // small UX delay then navigate to shipments list
+    // After showing success, navigate to shipments list and include new id so page can auto-open detail
     setTimeout(() => {
-      window.location.href = 'shipments.html';
+      const url = 'shipments.html?new=' + encodeURIComponent(shipment.id);
+      window.location.href = url;
     }, 900);
   }
 
@@ -149,6 +150,14 @@
     }
   }
 
+  // Show shipment detail (used by auto-open and view action)
+  function showShipmentDetailByIndex(idx) {
+    const shipments = JSON.parse(localStorage.getItem('shipments') || '[]');
+    const s = shipments[idx];
+    if (!s) return console.warn('showShipmentDetailByIndex: shipment not found at index', idx);
+    alert(`Shipment ID: ${s.id}\nSender: ${s.sender}\nReceiver: ${s.receiver}\nOrigin: ${s.origin}\nDestination: ${s.destination}\nStatus: ${s.status}\nPriority: ${s.priority}\nCost: ₹${s.cost}`);
+  }
+
   // View, Edit, Delete handlers using event delegation (safer)
   function tableActionHandler(e) {
     const btn = e.target.closest('button[data-action]');
@@ -158,9 +167,7 @@
     const shipments = JSON.parse(localStorage.getItem('shipments') || '[]');
 
     if (action === 'view') {
-      const s = shipments[idx];
-      if (!s) return alert('Shipment not found');
-      alert(`Shipment ID: ${s.id}\nSender: ${s.sender}\nReceiver: ${s.receiver}\nOrigin: ${s.origin}\nDestination: ${s.destination}\nStatus: ${s.status}\nPriority: ${s.priority}\nCost: ₹${s.cost}`);
+      showShipmentDetailByIndex(idx);
       return;
     }
 
@@ -214,6 +221,28 @@
 
     // If page lists shipments, populate
     loadShipmentsTable();
+
+    // Auto-open newly created shipment if present in URL (shipments.html?new=<id>)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('new')) {
+        const newId = params.get('new');
+        const shipments = JSON.parse(localStorage.getItem('shipments') || '[]');
+        const idx = shipments.findIndex(s => s.id === newId);
+        if (idx !== -1) {
+          console.log('Auto-opening new shipment', newId, 'at index', idx);
+          setTimeout(() => {
+            showShipmentDetailByIndex(idx);
+            // remove the query param to avoid re-opening on refresh
+            params.delete('new');
+            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+            history.replaceState(null, '', newUrl);
+          }, 400);
+        }
+      }
+    } catch (e) {
+      console.warn('Error checking auto-open param', e);
+    }
 
     // Expose tracking helper to global for tracking page to use
     window.trackShipmentById = trackShipmentById;
