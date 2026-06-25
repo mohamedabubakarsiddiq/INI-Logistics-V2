@@ -934,5 +934,10 @@ ${customer.name}
 </option>`;
 
 });
+localStorage.setItem(
+   "shipments",
+   JSON.stringify(shipments)
+);
+    
 
 }
