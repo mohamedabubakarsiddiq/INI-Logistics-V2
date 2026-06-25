@@ -45,6 +45,57 @@
     msg.style.color = success ? 'green' : 'red';
   }
 
+  // Show a transient toast with a link that can open the shipment detail
+  function showViewToast(text, index, shipmentId) {
+    let container = $id('toast');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-item';
+    toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#222;color:#fff;padding:12px 16px;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:10000;display:flex;gap:12px;align-items:center;';
+
+    const msg = document.createElement('span');
+    msg.textContent = text;
+    const link = document.createElement('a');
+    link.href = '#';
+    link.textContent = 'View new shipment';
+    link.style.cssText = 'color:#ffd54f;text-decoration:underline;cursor:pointer;font-weight:600;';
+
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      try {
+        showShipmentDetailByIndex(index);
+      } catch (err) {
+        // fallback: navigate to shipments page with param
+        window.location.href = 'shipments.html?new=' + encodeURIComponent(shipmentId);
+      }
+      // remove toast
+      if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+    });
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕';
+    closeBtn.style.cssText = 'background:none;border:none;color:#fff;cursor:pointer;font-size:14px;padding:0;margin-left:8px;';
+    closeBtn.addEventListener('click', () => {
+      if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+    });
+
+    toast.appendChild(msg);
+    toast.appendChild(link);
+    toast.appendChild(closeBtn);
+
+    container.appendChild(toast);
+
+    // Auto-remove after 8 seconds
+    setTimeout(() => {
+      if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 8000);
+  }
+
   // Validate required fields
   function validateForm(data) {
     const required = ['sender', 'receiver', 'origin', 'destination', 'weight', 'cost'];
@@ -102,7 +153,7 @@
 
     showMessage('✅ Shipment Created Successfully', true);
 
-    // After showing success, navigate to shipments list and include new id so page can auto-open detail
+    // After showing success, navigate to shipments list and include new id so page can show toast
     setTimeout(() => {
       const url = 'shipments.html?new=' + encodeURIComponent(shipment.id);
       window.location.href = url;
@@ -150,11 +201,12 @@
     }
   }
 
-  // Show shipment detail (used by auto-open and view action)
+  // Show shipment detail (used by toast link and view action)
   function showShipmentDetailByIndex(idx) {
     const shipments = JSON.parse(localStorage.getItem('shipments') || '[]');
     const s = shipments[idx];
     if (!s) return console.warn('showShipmentDetailByIndex: shipment not found at index', idx);
+    // This currently uses an alert; you can replace with modal/panel UI if available
     alert(`Shipment ID: ${s.id}\nSender: ${s.sender}\nReceiver: ${s.receiver}\nOrigin: ${s.origin}\nDestination: ${s.destination}\nStatus: ${s.status}\nPriority: ${s.priority}\nCost: ₹${s.cost}`);
   }
 
@@ -222,7 +274,7 @@
     // If page lists shipments, populate
     loadShipmentsTable();
 
-    // Auto-open newly created shipment if present in URL (shipments.html?new=<id>)
+    // When a new shipment was just created, show a toast with a link to view it
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.has('new')) {
@@ -230,18 +282,16 @@
         const shipments = JSON.parse(localStorage.getItem('shipments') || '[]');
         const idx = shipments.findIndex(s => s.id === newId);
         if (idx !== -1) {
-          console.log('Auto-opening new shipment', newId, 'at index', idx);
-          setTimeout(() => {
-            showShipmentDetailByIndex(idx);
-            // remove the query param to avoid re-opening on refresh
-            params.delete('new');
-            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-            history.replaceState(null, '', newUrl);
-          }, 400);
+          console.log('New shipment created', newId, 'at index', idx);
+          showViewToast(`New shipment ${newId} created`, idx, newId);
+          // remove the query param to avoid re-show on refresh
+          params.delete('new');
+          const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+          history.replaceState(null, '', newUrl);
         }
       }
     } catch (e) {
-      console.warn('Error checking auto-open param', e);
+      console.warn('Error checking new param', e);
     }
 
     // Expose tracking helper to global for tracking page to use
