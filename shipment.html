@@ -174,11 +174,13 @@ Create Shipment
 
 
 
+<!-- Load shared main.js first so checkLogin and helpers exist -->
+<script src="js/main.js"></script>
 <script src="js/script.js"></script>
 
 <script>
-checkLogin();
-initializeShipmentPage();
+if (typeof checkLogin === 'function') checkLogin();
+if (typeof initializeShipmentPage === 'function') initializeShipmentPage();
 </script>
 
 <div id="toast"></div>
