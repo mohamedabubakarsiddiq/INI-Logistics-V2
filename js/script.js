@@ -102,9 +102,9 @@
 
     showMessage('✅ Shipment Created Successfully', true);
 
-    // small UX delay then reload to show updated lists
+    // small UX delay then navigate to shipments list
     setTimeout(() => {
-      location.reload();
+      window.location.href = 'shipments.html';
     }, 900);
   }
 
