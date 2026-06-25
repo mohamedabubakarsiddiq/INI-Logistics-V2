@@ -144,27 +144,15 @@ onclick="location.reload()">
 
 <section class="charts-grid">
 
-<div class="chart-card">
-<h3>Monthly Revenue</h3>
-<section class="charts-grid">
+  <div class="chart-card">
+    <h3>Monthly Revenue</h3>
+    <canvas id="revenueChart"></canvas>
+  </div>
 
-<div class="chart-card">
-<h3>Monthly Revenue</h3>
-<canvas id="revenueChart"></canvas>
-</div>
-
-<div class="chart-card">
-<h3>Shipment Status</h3>
-<canvas id="shipmentChart"></canvas>
-</div>
-
-</section>
-</div>
-
-<div class="chart-card">
-<h3>Shipment Status</h3>
-<canvas id="shipmentChart"></canvas>
-</div>
+  <div class="chart-card">
+    <h3>Shipment Status</h3>
+    <canvas id="shipmentChart"></canvas>
+  </div>
 
 </section>
 
@@ -179,7 +167,6 @@ onclick="location.reload()">
 <h2 id="todayDelivered">0</h2>
 <p>Delivered Today</p>
 </div>
-
 
 </section>
 
@@ -242,7 +229,7 @@ class="action-card">
 Live distribution of shipment statuses.
 </p>
 
-<canvas id="shipmentChart"></canvas>
+<!-- Use the same unique shipmentChart canvas above; don't duplicate canvases here. -->
 
 </div>
 
@@ -315,8 +302,6 @@ Delivered
 </tbody>
 
 </table>
-
-
 
 </section>
 
