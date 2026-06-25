@@ -97,6 +97,19 @@ count;
 const hamburger = document.querySelector(".hamburger");
 const navLinks = document.querySelector(".nav-links");
 
-hamburger.addEventListener("click", () => {
-    navLinks.classList.toggle("active");
+if (hamburger && navLinks) {
+    hamburger.addEventListener("click", () => {
+        navLinks.classList.toggle("active");
+    });
+}
+const hiddenElements = document.querySelectorAll(".hidden");
+
+window.addEventListener("scroll", () => {
+    hiddenElements.forEach((element) => {
+        const top = element.getBoundingClientRect().top;
+
+        if (top < window.innerHeight - 100) {
+            element.classList.add("show");
+        }
+    });
 });
