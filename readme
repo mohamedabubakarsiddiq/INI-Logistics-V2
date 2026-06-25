@@ -1,1 +1,25 @@
+# INI Logistics V2
 
+A logistics management web application developed using HTML, CSS, and JavaScript.
+
+## Features
+- User Login
+- Dashboard Analytics
+- New Shipment Creation
+- Shipment Management
+- Shipment Tracking
+
+## Technologies
+- HTML5
+- CSS3
+- JavaScript
+- GitHub Pages
+
+## Live Demo
+https://mohamedabubakarsiddiq.github.io/INI-Logistics-V2/
+
+## Test Cases
+Available in /TestCases folder
+
+## Automation
+Selenium WebDriver scripts available in /Automation folder
