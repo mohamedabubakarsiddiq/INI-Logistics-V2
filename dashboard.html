@@ -80,13 +80,8 @@ onclick="location.reload()">
 </div>
 
 <div class="dashboard-card">
-
-<h2 id="totalCustomers">
-0
-</h2>
-
+<h2 id="totalCustomers">0</h2>
 <p>Total Customers</p>
-
 </div>
 
 <div class="dashboard-card">
@@ -105,64 +100,27 @@ onclick="location.reload()">
 </div>
 
 <div class="dashboard-card">
-
-<h2 id="deliveryRate">
-0%
-</h2>
-
+<h2 id="deliveryRate">0%</h2>
 <p>Delivery Rate</p>
-
 </div>
 
 <div class="dashboard-card">
-
-<h2 id="totalRevenue">
-₹0
-</h2>
-
+<h2 id="totalRevenue">₹0</h2>
 <p>Total Revenue</p>
-
 </div>
-
-<canvas id="revenueChart"></canvas>
 
 </section>
 
-<section class="business-stats">
+<section class="charts-grid">
 
-<div class="stat-box">
-<h2>500+</h2>
-<p>Shipments Delivered</p>
+<div class="chart-card">
+<h3>Monthly Revenue</h3>
+<canvas id="revenueChart"></canvas>
 </div>
 
-<div class="stat-box">
-<h2>100+</h2>
-<p>Clients</p>
-</div>
-
-<div class="stat-box">
-<h2>20+</h2>
-<p>Countries</p>
-</div>
-
-<div class="stat-box">
-<h2>99%</h2>
-<p>Success Rate</p>
-</div>
-
-<div class="stat-box">
-<h2 id="totalCustomers"></h2>
-<p>Customers</p>
-</div>
-
-<div class="stat-box">
-<h2 id="totalRevenue"></h2>
-<p>Revenue</p>
-</div>
-
-<div class="stat-box">
-<h2 id="totalShipments"></h2>
-<p>Shipments</p>
+<div class="chart-card">
+<h3>Shipment Status</h3>
+<canvas id="shipmentChart"></canvas>
 </div>
 
 </section>
@@ -268,6 +226,24 @@ Out For Delivery
 <div class="status-card delivered">
 Delivered
 </div>
+
+</section>
+
+<section class="shipment-flow">
+
+<div class="flow-step">Created</div>
+<div class="flow-line"></div>
+
+<div class="flow-step">Picked Up</div>
+<div class="flow-line"></div>
+
+<div class="flow-step">In Transit</div>
+<div class="flow-line"></div>
+
+<div class="flow-step">Out For Delivery</div>
+<div class="flow-line"></div>
+
+<div class="flow-step">Delivered</div>
 
 </section>
 
