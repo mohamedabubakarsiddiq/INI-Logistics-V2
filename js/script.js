@@ -1,4 +1,4 @@
-// js/script.js - consolidated and safer
+// js/script.js - consolidated and safer (patched)
 (function () {
   'use strict';
 
@@ -60,6 +60,7 @@
   // Save shipment (single consolidated function)
   function saveShipmentHandler(event) {
     event && event.preventDefault();
+    console.log('saveShipmentHandler called');
     const shipment = {
       id: $id('shipmentId') ? $id('shipmentId').value : generateShipmentId(),
       sender: ($id('customerSelect') && $id('customerSelect').value) || ($id('sender') && $id('sender').value.trim()) || 'Unknown',
@@ -185,9 +186,13 @@
     // Initialize page id & customers
     initializeShipmentPage();
 
+    // Expose save handler for debugging
+    window.saveShipment = saveShipmentHandler;
+
     // Create button
     const createBtn = $id('createShipmentBtn');
     if (createBtn) createBtn.addEventListener('click', saveShipmentHandler);
+    else console.log('createShipmentBtn not found on page');
 
     // Shipment table actions
     const shipmentTable = $id('shipmentTable');
