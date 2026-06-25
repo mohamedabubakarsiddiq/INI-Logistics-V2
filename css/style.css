@@ -81,9 +81,8 @@ border-radius:5px;
 }
 
 .hero-content{
-    width:100%;
     max-width:900px;
-    margin:0 auto;
+    margin:auto;
 }
 
 .hero-content{
@@ -1343,3 +1342,15 @@ color:#003366;
     color:white !important;
     opacity:1 !important;
 }
+.hero-content h1{
+    color:white !important;
+}
+
+.hero-content p{
+    color:white !important;
+}
+
+.hero-tagline{
+    color:#ffcc00 !important;
+}
+
