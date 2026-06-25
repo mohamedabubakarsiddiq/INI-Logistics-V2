@@ -48,6 +48,20 @@ Customers
 
 </nav>
 
+    <section class="dashboard-hero">
+
+    <div class="dashboard-hero-content">
+
+        <h1>Welcome Back, Admin 👋</h1>
+
+        <p>
+            Monitor shipments, customers, revenue and logistics performance in real time.
+        </p>
+
+    </div>
+
+</section>
+
 <!-- Dashboard Header -->
 
 <section class="dashboard-header">
@@ -75,8 +89,9 @@ onclick="location.reload()">
 <section class="dashboard-grid">
 
 <div class="dashboard-card">
-<h2 id="totalShipments">0</h2>
-<p>Total Shipments</p>
+    <div class="card-icon">📦</div>
+    <h2 id="totalShipments">0</h2>
+    <p>Total Shipments</p>
 </div>
 
 <div class="dashboard-card">
@@ -105,8 +120,9 @@ onclick="location.reload()">
 </div>
 
 <div class="dashboard-card">
-<h2 id="totalRevenue">₹0</h2>
-<p>Total Revenue</p>
+    <div class="card-icon">💰</div>
+    <h2 id="totalRevenue">₹0</h2>
+    <p>Total Revenue</p>
 </div>
 
 </section>
@@ -115,7 +131,19 @@ onclick="location.reload()">
 
 <div class="chart-card">
 <h3>Monthly Revenue</h3>
+<section class="charts-grid">
+
+<div class="chart-card">
+<h3>Monthly Revenue</h3>
 <canvas id="revenueChart"></canvas>
+</div>
+
+<div class="chart-card">
+<h3>Shipment Status</h3>
+<canvas id="shipmentChart"></canvas>
+</div>
+
+</section>
 </div>
 
 <div class="chart-card">
