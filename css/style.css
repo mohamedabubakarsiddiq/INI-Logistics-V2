@@ -1353,4 +1353,17 @@ color:#003366;
 .hero-tagline{
     color:#ffcc00 !important;
 }
-
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".hidden").forEach(el => {
+        el.classList.add("show");
+    });
+});
+.hero,
+.hero-content,
+.hero-content h1,
+.hero-content p{
+    opacity:1 !important;
+    visibility:visible !important;
+    display:block !important;
+    color:white !important;
+}
