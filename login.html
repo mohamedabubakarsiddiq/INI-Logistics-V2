@@ -2,83 +2,436 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INI Logistics - Login</title>
 
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Login | INI Logistics</title>
+
+<link rel="stylesheet"
+href="css/style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 </head>
 
 <body>
 
-    <div class="login-page">
+<!-- ==========================
+        NAVIGATION
+========================== -->
 
-        <div class="login-container">
+<nav class="navbar">
 
-            <img src="images/logo.png"
-                 alt="INI Logistics Logo"
-                 class="login-logo">
+<div class="logo">
 
-            <h2>Welcome Back</h2>
+<img src="images/logo.png"
+alt="INI Logistics">
 
-            <p>Login to manage shipments and tracking.</p>
+</div>
 
-            <input
-                type="text"
-                id="username"
-                placeholder="Username">
+<ul class="nav-links">
 
-            <input
-                type="password"
-                id="password"
-                placeholder="Password">
+<li>
+<a href="index.html">
+Home
+</a>
+</li>
 
-            <button onclick="login()">
-                Login
-            </button>
+<li>
+<a href="tracking.html">
+Tracking
+</a>
+</li>
 
-            <div id="errorMessage"></div>
+<li>
+<a href="contact.html">
+Contact
+</a>
+</li>
 
-        </div>
+<li>
+<a href="faq.html">
+FAQ
+</a>
+</li>
 
-    </div>
+</ul>
 
-    <script src="js/login.js"></script>
+</nav>
+
+<!-- ==========================
+        LOGIN SECTION
+========================== -->
+
+<section class="login-page">
+
+<div class="login-container">
+
+<div class="login-left">
+
+<img
+src="images/logo.png"
+class="login-logo"
+alt="INI Logistics">
+
+<h1>
+
+Welcome Back
+
+</h1>
+
+<p>
+
+Sign in to access the INI Logistics
+Shipment Management System.
+
+</p>
+
+<div class="login-features">
+
+<div class="feature">
+
+<i class="fa-solid fa-truck-fast"></i>
+
+<span>
+
+Real-Time Shipment Tracking
+
+</span>
+
+</div>
+
+<div class="feature">
+
+<i class="fa-solid fa-box"></i>
+
+<span>
+
+Shipment Management
+
+</span>
+
+</div>
+
+<div class="feature">
+
+<i class="fa-solid fa-chart-column"></i>
+
+<span>
+
+Analytics & Reports
+
+</span>
+
+</div>
+
+<div class="feature">
+
+<i class="fa-solid fa-users"></i>
+
+<span>
+
+Customer Management
+
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ==========================
+        LOGIN CARD
+========================== -->
+
+<div class="login-card">
+
+<h2>
+
+Administrator Login
+
+</h2>
+
+<p>
+
+Please sign in to continue.
+
+</p>
+
+<form
+id="loginForm">
+
+<div class="form-group">
+
+<label>
+
+Username
+
+</label>
+
+<input
+type="text"
+id="username"
+placeholder="Enter username"
+autocomplete="username"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>
+
+Password
+
+</label>
+
+<div class="password-box">
+
+<input
+type="password"
+id="password"
+placeholder="Enter password"
+autocomplete="current-password"
+required>
+
+<button
+type="button"
+class="toggle-password"
+onclick="togglePassword()">
+
+<i
+id="eyeIcon"
+class="fa-solid fa-eye">
+</i>
+
+</button>
+
+</div>
+
+</div>
+
+<!-- ==========================
+        LOGIN OPTIONS
+========================== -->
+
+<div class="login-options">
+
+<label class="remember-me">
+
+<input
+type="checkbox"
+id="rememberMe">
+
+<span>
+
+Remember Me
+
+</span>
+
+</label>
+
+<a
+href="#"
+class="forgot-link"
+onclick="forgotPassword()">
+
+Forgot Password?
+
+</a>
+
+</div>
+
+<!-- ==========================
+        ERROR MESSAGE
+========================== -->
+
+<p
+id="errorMessage"
+class="error-message">
+
+</p>
+
+<!-- ==========================
+        LOGIN BUTTON
+========================== -->
+
+<button
+type="submit"
+id="loginBtn"
+class="login-btn">
+
+<i class="fa-solid fa-right-to-bracket"></i>
+
+<span>
+
+Login
+
+</span>
+
+</button>
+
+<!-- ==========================
+        DEMO CREDENTIALS
+========================== -->
+
+<div class="demo-card">
+
+<h4>
+
+Demo Credentials
+
+</h4>
+
+<p>
+
+<b>Username:</b> admin
+
+</p>
+
+<p>
+
+<b>Password:</b> admin123
+
+</p>
+
+</div>
+
+<div class="back-home">
+
+<a href="index.html">
+
+← Back to Home
+
+</a>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ==========================
+        LOADER
+========================== -->
+
+<div
+id="loader"
+class="loader">
+
+</div>
+
+<!-- ==========================
+        TOAST
+========================== -->
 
 <div id="toast"></div>
+
+<!-- ==========================
+        FOOTER
+========================== -->
 
 <footer class="footer">
 
 <div class="footer-content">
 
 <div>
-<h3>INI Logistics</h3>
-<p>Delivering Excellence Worldwide</p>
+
+<h3>
+
+INI Logistics
+
+</h3>
+
+<p>
+
+Reliable • Secure • Fast
+
+</p>
+
 </div>
 
 <div>
-<h4>Quick Links</h4>
+
+<h4>
+
+Quick Links
+
+</h4>
+
 <ul>
-<li><a href="dashboard.html">Dashboard</a></li>
-<li><a href="shipment.html">Shipments</a></li>
+
+<li><a href="index.html">Home</a></li>
+
 <li><a href="tracking.html">Tracking</a></li>
-<li><a href="reports.html">Reports</a></li>
+
 <li><a href="contact.html">Contact</a></li>
+
+<li><a href="faq.html">FAQ</a></li>
+
 </ul>
+
 </div>
 
 <div>
-<h4>Contact</h4>
-<p>support@inilogistics.com</p>
-<p>+91 98407 03914</p>
+
+<h4>
+
+Support
+
+</h4>
+
+<p>
+
+support@inilogistics.com
+
+</p>
+
+<p>
+
++91 98407 03914
+
+</p>
+
 </div>
 
 </div>
 
 <div class="copyright">
+
 © 2026 INI Logistics. All Rights Reserved.
+
 </div>
+
+</footer>
+
+<!-- ==========================
+        JAVASCRIPT
+========================== -->
+
+<script src="js/main.js"></script>
+<script src="js/login.js"></script>
+
+<script>
+
+if(localStorage.getItem("loggedIn")==="true"){
+
+    window.location.href="dashboard.html";
+
+}
+
+</script>
 
 </body>
 
 </html>
+    
