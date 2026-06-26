@@ -4,103 +4,766 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
 
-<title>Track Shipment</title>
+<title>Track Shipment | INI Logistics</title>
 
 <link rel="stylesheet"
       href="css/style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 </head>
 
 <body>
 
+<!-- =========================
+        NAVIGATION
+========================= -->
+
 <nav class="navbar">
 
 <div class="logo">
+
 <img src="images/logo.png"
      alt="INI Logistics">
+
 </div>
 
 <ul class="nav-links">
 
 <li><a href="dashboard.html">Dashboard</a></li>
+
 <li><a href="shipment.html">New Shipment</a></li>
+
 <li><a href="shipments.html">Shipments</a></li>
-<li><a href="tracking.html">Tracking</a></li>
-<li><a href="profile.html">Profile</a></li>
-<li><a href="contact.html">Contact</a></li>
+
+<li><a href="tracking.html" class="active">
+Tracking
+</a></li>
+
 <li><a href="reports.html">Reports</a></li>
+
+<li><a href="customers.html">Customers</a></li>
+
+<li><a href="profile.html">Profile</a></li>
+
+<li>
+
+<a href="#"
+onclick="logout()">
+
+Logout
+
+</a>
+
+</li>
+
 </ul>
 
 </nav>
 
+<!-- =========================
+        TRACKING SECTION
+========================= -->
+
 <section class="tracking-section">
 
-<h1>Track Shipment</h1>
+<div class="tracking-header">
+
+<h1>
+
+<i class="fas fa-location-dot"></i>
+
+Shipment Tracking
+
+</h1>
+
+<p>
+
+Track your shipment in real-time.
+
+</p>
+
+</div>
+
+<!-- =========================
+        SEARCH CARD
+========================= -->
+
+<div class="tracking-search-card">
 
 <div class="tracking-search">
 
 <input
 type="text"
 id="trackingId"
-placeholder="Enter Tracking ID">
+placeholder="Enter Shipment ID (Example: SHP100001)">
 
-<button onclick="trackShipment()">
-Track
+<button
+onclick="trackShipment()"
+class="track-btn">
+
+<i class="fas fa-search"></i>
+
+Track Shipment
+
+</button>
+
+<button
+onclick="clearTracking()"
+class="clear-btn">
+
+<i class="fas fa-rotate-right"></i>
+
+Clear
+
 </button>
 
 </div>
 
-<div id="trackingResult"></div>
+</div>
+
+<!-- =========================
+        RESULT CARD
+========================= -->
+
+<div
+id="trackingResult"
+class="tracking-result"
+style="display:none;">
+
+<div class="tracking-card">
+
+<div class="tracking-card-header">
+
+<h2>
+
+Shipment Details
+
+</h2>
+
+<span
+id="trackingBadge"
+class="status-badge">
+
+Shipment Created
+
+</span>
+
+</div>
+
+<div class="tracking-grid">
+
+<div>
+
+<label>
+
+Shipment ID
+
+</label>
+
+<p id="trackShipmentId"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Sender
+
+</label>
+
+<p id="trackSender"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Receiver
+
+</label>
+
+<p id="trackReceiver"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Origin
+
+</label>
+
+<p id="trackOrigin"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Destination
+
+</label>
+
+<p id="trackDestination"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Package Type
+
+</label>
+
+<p id="trackPackage"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Weight
+
+</label>
+
+<p id="trackWeight"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Priority
+
+</label>
+
+<p id="trackPriority"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Shipping Cost
+
+</label>
+
+<p id="trackCost"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Estimated Delivery
+
+</label>
+
+<p id="trackETA"></p>
+
+</div>
+
+</div>
+
+</div>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Track Shipment | INI Logistics</title>
+
+<link rel="stylesheet"
+      href="css/style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<!-- =========================
+        NAVIGATION
+========================= -->
+
+<nav class="navbar">
+
+<div class="logo">
+
+<img src="images/logo.png"
+     alt="INI Logistics">
+
+</div>
+
+<ul class="nav-links">
+
+<li><a href="dashboard.html">Dashboard</a></li>
+
+<li><a href="shipment.html">New Shipment</a></li>
+
+<li><a href="shipments.html">Shipments</a></li>
+
+<li><a href="tracking.html" class="active">
+Tracking
+</a></li>
+
+<li><a href="reports.html">Reports</a></li>
+
+<li><a href="customers.html">Customers</a></li>
+
+<li><a href="profile.html">Profile</a></li>
+
+<li>
+
+<a href="#"
+onclick="logout()">
+
+Logout
+
+</a>
+
+</li>
+
+</ul>
+
+</nav>
+
+<!-- =========================
+        TRACKING SECTION
+========================= -->
+
+<section class="tracking-section">
+
+<div class="tracking-header">
+
+<h1>
+
+<i class="fas fa-location-dot"></i>
+
+Shipment Tracking
+
+</h1>
+
+<p>
+
+Track your shipment in real-time.
+
+</p>
+
+</div>
+
+<!-- =========================
+        SEARCH CARD
+========================= -->
+
+<div class="tracking-search-card">
+
+<div class="tracking-search">
+
+<input
+type="text"
+id="trackingId"
+placeholder="Enter Shipment ID (Example: SHP100001)">
+
+<button
+onclick="trackShipment()"
+class="track-btn">
+
+<i class="fas fa-search"></i>
+
+Track Shipment
+
+</button>
+
+<button
+onclick="clearTracking()"
+class="clear-btn">
+
+<i class="fas fa-rotate-right"></i>
+
+Clear
+
+</button>
+
+</div>
+
+</div>
+
+<!-- =========================
+        RESULT CARD
+========================= -->
+
+<div
+id="trackingResult"
+class="tracking-result"
+style="display:none;">
+
+<div class="tracking-card">
+
+<div class="tracking-card-header">
+
+<h2>
+
+Shipment Details
+
+</h2>
+
+<span
+id="trackingBadge"
+class="status-badge">
+
+Shipment Created
+
+</span>
+
+</div>
+
+<div class="tracking-grid">
+
+<div>
+
+<label>
+
+Shipment ID
+
+</label>
+
+<p id="trackShipmentId"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Sender
+
+</label>
+
+<p id="trackSender"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Receiver
+
+</label>
+
+<p id="trackReceiver"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Origin
+
+</label>
+
+<p id="trackOrigin"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Destination
+
+</label>
+
+<p id="trackDestination"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Package Type
+
+</label>
+
+<p id="trackPackage"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Weight
+
+</label>
+
+<p id="trackWeight"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Priority
+
+</label>
+
+<p id="trackPriority"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Shipping Cost
+
+</label>
+
+<p id="trackCost"></p>
+
+</div>
+
+<div>
+
+<label>
+
+Estimated Delivery
+
+</label>
+
+<p id="trackETA"></p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =========================
+        TRACKING HISTORY
+========================= -->
+
+<div class="history-card">
+
+    <h2>
+        <i class="fas fa-clock-rotate-left"></i>
+        Tracking History
+    </h2>
+
+    <div id="trackingHistory" class="history-list">
+
+        <!-- Generated by tracking.js -->
+
+    </div>
+
+</div>
+
+<!-- =========================
+        MAP PLACEHOLDER
+========================= -->
+
+<div class="map-card">
+
+    <h2>
+        <i class="fas fa-map-marked-alt"></i>
+        Shipment Route
+    </h2>
+
+    <div class="map-placeholder">
+
+        <i class="fas fa-route"></i>
+
+        <h3>Live Route Map</h3>
+
+        <p>
+
+            Google Maps integration can be added
+            in the production version.
+
+        </p>
+
+    </div>
+
+</div>
+
+<!-- =========================
+        ACTION BUTTONS
+========================= -->
+
+<div class="tracking-actions">
+
+    <button
+    class="track-again-btn"
+    onclick="clearTracking()">
+
+        <i class="fas fa-magnifying-glass"></i>
+
+        Track Another Shipment
+
+    </button>
+
+</div>
+
+<!-- =========================
+        NO RESULT
+========================= -->
+
+<div
+id="noTrackingFound"
+class="no-tracking-card"
+style="display:none;">
+
+    <i class="fas fa-box-open"></i>
+
+    <h2>
+
+        Shipment Not Found
+
+    </h2>
+
+    <p>
+
+        Please enter a valid Shipment ID.
+
+    </p>
+
+</div>
 
 </section>
 
+<!-- =========================
+        LOADER
+========================= -->
 
+<div id="loader" class="loader"></div>
 
-
-<script src="js/main.js"></script>
-<script src="js/tracking.js"></script>
-
-
-<script>
-checkLogin();
-</script>
+<!-- =========================
+        TOAST
+========================= -->
 
 <div id="toast"></div>
 
+<!-- =========================
+        FOOTER
+========================= -->
+
 <footer class="footer">
 
-<div class="footer-content">
+    <div class="footer-content">
 
-<div>
-<h3>INI Logistics</h3>
-<p>Delivering Excellence Worldwide</p>
-</div>
+        <div>
 
-<div>
-<h4>Quick Links</h4>
-<ul>
-<li><a href="dashboard.html">Dashboard</a></li>
-<li><a href="shipment.html">Shipments</a></li>
-<li><a href="tracking.html">Tracking</a></li>
-</ul>
-</div>
+            <h3>INI Logistics</h3>
 
-<div>
-<h4>Contact</h4>
-<p>support@inilogistics.com</p>
-<p>+91 98407 03914</p>
-</div>
+            <p>
 
-</div>
+                Delivering Excellence Worldwide
 
-<div class="copyright">
-© 2026 INI Logistics. All Rights Reserved.
-</div>
+            </p>
+
+        </div>
+
+        <div>
+
+            <h4>Quick Links</h4>
+
+            <ul>
+
+                <li>
+                    <a href="dashboard.html">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a href="shipments.html">
+                        Shipments
+                    </a>
+                </li>
+
+                <li>
+                    <a href="reports.html">
+                        Reports
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+
+        <div>
+
+            <h4>Contact</h4>
+
+            <p>
+
+                support@inilogistics.com
+
+            </p>
+
+            <p>
+
+                +91 98407 03914
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="copyright">
+
+        © 2026 INI Logistics.
+        All Rights Reserved.
+
+    </div>
+
+</footer>
+
+<!-- =========================
+        JAVASCRIPT
+========================= -->
+
+<script src="js/main.js"></script>
+
+<script src="js/tracking.js"></script>
+
+<script>
+
+checkLogin();
+
+</script>
 
 </body>
 
 </html>
 
+
+
+      
