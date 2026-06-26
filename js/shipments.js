@@ -19,6 +19,12 @@ if(!table) return;
 
 table.innerHTML = "";
 
+if (shipments.length === 0) {
+    document.getElementById("noData").style.display = "block";
+} else {
+    document.getElementById("noData").style.display = "none";
+}
+
 if(shipments.length === 0){
 
 table.innerHTML = `
@@ -140,11 +146,11 @@ JSON.parse(
 localStorage.getItem("shipments")
 ) || [];
 
-if(
-confirm(
-"Delete this shipment?"
-)
-){
+if(confirm("Are you sure you want to delete this shipment?")){
+
+        // delete code
+}
+}
 
 shipments.splice(index,1);
 
