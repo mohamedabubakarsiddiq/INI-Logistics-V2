@@ -1,82 +1,48 @@
 function loadShipments(){
 
-let shipments =
-JSON.parse(
-localStorage.getItem("shipments")
-) || [];
+    const shipments =
+    JSON.parse(localStorage.getItem("shipments")) || [];
 
-document.getElementById(
-"shipmentCount"
-).innerText =
-shipments.length;
+    const table =
+    document.getElementById("shipmentTable");
 
-let table =
-document.getElementById(
-"shipmentTable"
-);
+    document.getElementById("shipmentCount").innerText =
+    shipments.length;
 
-if(!table) return;
+    table.innerHTML = "";
 
-table.innerHTML = "";
+    if(shipments.length===0){
 
+        table.innerHTML=`
+        <tr>
+        <td colspan="12">
+        <div class="empty-state">
+        📦
+        <h3>No Shipments Found</h3>
+        </div>
+        </td>
+        </tr>
+        `;
 
-if(shipments.length === 0){
+        return;
+    }
 
-table.innerHTML = `
-<tr>
-<td colspan="12">
+    shipments.forEach((shipment,index)=>{
 
-<div class="empty-state">
+        table.innerHTML += renderShipmentRow(shipment,index);
 
-📦
+    });
 
-<h3>No Shipments Found</h3>
-
-<p>
-Create your first shipment.
-</p>
-
-</div>
-
-</td>
-</tr>
-`;
-
-return;
+    document
+    .querySelectorAll(".status-dropdown")
+    .forEach(setStatusColor);
 
 }
+function renderShipmentRow(shipment, index){
 
-shipments.forEach(
-(shipment,index)=>{
+    const cost = Number(shipment.cost || 0).toLocaleString("en-IN");
 
-let badgeClass = "";
-
-switch(shipment.status){
-
-case "Shipment Created":
-badgeClass = "created";
-break;
-
-case "Picked Up":
-badgeClass = "picked";
-break;
-
-case "In Transit":
-badgeClass = "transit";
-break;
-
-case "Out For Delivery":
-badgeClass = "delivery";
-break;
-
-case "Delivered":
-badgeClass = "delivered";
-break;
-
-}
-
-table.innerHTML += `
-
+    return `
 <tr>
 
 <td>${shipment.id}</td>
@@ -95,64 +61,74 @@ table.innerHTML += `
 
 <td>${shipment.priority || "-"}</td>
 
-<td>₹${shipment.cost || 0}</td>
-
-const cost = Number(shipment.cost).toLocaleString("en-IN");
-<td>${cost}</td>
+<td>₹${cost}</td>
 
 <td>${shipment.estimatedDelivery}</td>
 
 <td>
+
 <select
-    class="status-dropdown"
-    onchange="updateStatus(${index}, this.value)"
->
-    <option value="Shipment Created" ${shipment.status === "Shipment Created" ? "selected" : ""}>Shipment Created</option>
+class="status-dropdown"
+onchange="updateStatus(${index}, this)">
 
-    <option value="Picked Up" ${shipment.status === "Picked Up" ? "selected" : ""}>Picked Up</option>
+<option value="Shipment Created"
+${shipment.status==="Shipment Created"?"selected":""}>
+Shipment Created
+</option>
 
-    <option value="In Transit" ${shipment.status === "In Transit" ? "selected" : ""}>In Transit</option>
+<option value="Picked Up"
+${shipment.status==="Picked Up"?"selected":""}>
+Picked Up
+</option>
 
-    <option value="Out For Delivery" ${shipment.status === "Out For Delivery" ? "selected" : ""}>Out For Delivery</option>
+<option value="In Transit"
+${shipment.status==="In Transit"?"selected":""}>
+In Transit
+</option>
 
-    <option value="Delivered" ${shipment.status === "Delivered" ? "selected" : ""}>Delivered</option>
+<option value="Out For Delivery"
+${shipment.status==="Out For Delivery"?"selected":""}>
+Out For Delivery
+</option>
+
+<option value="Delivered"
+${shipment.status==="Delivered"?"selected":""}>
+Delivered
+</option>
+
 </select>
 
 <div class="progress-wrapper">
-    ${createProgressBar(shipment.status)}
+${createProgressBar(shipment.status)}
 </div>
 
 </td>
 
-
 <td>
 
-<button class="icon-btn view-btn"
-onclick="viewShipment(${index})"
-title="View Shipment">
+<button
+class="icon-btn view-btn"
+onclick="viewShipment(${index})">
 👁
 </button>
 
-<button class="icon-btn edit-btn"
-onclick="editShipment(${index})"
-title="Edit Shipment">
+<button
+class="icon-btn edit-btn"
+onclick="editShipment(${index})">
 ✏️
 </button>
 
-<button class="icon-btn delete-btn"
-onclick="deleteShipment(${index})"
-title="Delete Shipment">
+<button
+class="icon-btn delete-btn"
+onclick="deleteShipment(${index})">
 🗑
 </button>
 
 </td>
 
 </tr>
-
 `;
-
-});
-
+}
 }
 function deleteShipment(index){
 
