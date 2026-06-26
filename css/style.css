@@ -926,6 +926,21 @@ font-weight:bold;
     font-weight:bold;
 }
 
+.shipment-table{
+    width:100%;
+    table-layout:fixed;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+.shipment-table th,
+.shipment-table td{
+    padding:8px 6px;
+    text-align:center;
+    vertical-align:middle;
+    word-wrap:break-word;
+}
+
 .shipment-table thead{
     position:sticky;
     top:0;
@@ -952,15 +967,17 @@ background:#d4edda;
 
 .action-btn{
 
-padding:6px 10px;
+padding:4px 8px;
 
 border:none;
 
 cursor:pointer;
 
+font-size:12px;
+    
 border-radius:5px;
 
-margin-right:5px;
+margin-right:2px;
 }
 
 .edit-btn{
@@ -973,11 +990,11 @@ color:white;
 }
 
 .status-dropdown{
-    width:170px;
-    padding:8px 10px;
+    width:120px;
+    padding:5px;
     border:1px solid #ccc;
     border-radius:6px;
-    font-size:14px;
+    font-size:12px;
     background:#fff;
     cursor:pointer;
     outline:none;
@@ -1232,16 +1249,16 @@ color:#146c43;
 display:flex;
 align-items:center;
 justify-content:center;
-gap:6px;
+gap:4px;
 
 }
 
 .progress-step{
 
-width:18px;
-height:18px;
+width:10px;
+height:108px;
 border-radius:50%;
-background:#dcdcdc;
+background:#ccc;
 position:relative;
 
 }
@@ -1256,11 +1273,11 @@ background:#28a745;
 
 content:"";
 position:absolute;
-top:7px;
-left:18px;
-width:18px;
-height:4px;
-background:#dcdcdc;
+top:3px;
+left:10px;
+width:8px;
+height:3px;
+background:#ccc;
 
 }
 
