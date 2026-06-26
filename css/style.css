@@ -971,6 +971,21 @@ background:#ffc107;
 background:#dc3545;
 color:white;
 }
+
+.status-dropdown{
+    width:170px;
+    padding:8px 10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:14px;
+    background:#fff;
+    cursor:pointer;
+    outline:none;
+}
+
+.status-dropdown:focus{
+    border-color:#003366;
+}
 /* TRACKING */
 
 .tracking-section{
