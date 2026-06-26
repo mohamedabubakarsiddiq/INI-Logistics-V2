@@ -934,7 +934,7 @@ font-weight:bold;
     width:100%;
     table-layout:fixed;
     border-collapse:collapse;
-    font-size:14px;
+    font-size:13px;
 }
 
 .shipment-table th,
@@ -942,7 +942,9 @@ font-weight:bold;
     padding:8px 6px;
     text-align:center;
     vertical-align:middle;
-    word-wrap:break-word;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .shipment-table thead{
@@ -973,13 +975,7 @@ background:#d4edda;
 
 padding:4px 8px;
 
-border:none;
-
-cursor:pointer;
-
-font-size:12px;
-    
-border-radius:5px;
+font-size:11px;
 
 margin-right:2px;
 }
@@ -1206,6 +1202,12 @@ transition:.3s;
 
 /* Shipment Created */
 
+.status-dropdown{
+    width:120px;
+    padding:5px;
+    font-size:12px;
+}
+
 .status-dropdown.created{
 
 background:#dbeafe;
@@ -1259,11 +1261,9 @@ gap:4px;
 
 .progress-step{
 
-width:10px;
-height:108px;
-border-radius:50%;
-background:#ccc;
-position:relative;
+width:8px;
+height:8px;
+
 
 }
 
@@ -1275,13 +1275,9 @@ background:#28a745;
 
 .progress-step:not(:last-child)::after{
 
-content:"";
-position:absolute;
-top:3px;
-left:10px;
-width:8px;
-height:3px;
-background:#ccc;
+left:8px;
+width:6px;
+
 
 }
 
