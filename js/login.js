@@ -1,17 +1,19 @@
 /*====================================================
     INI Logistics
-    login.js - Part 1
+    login.js
 ====================================================*/
-
-/*=========================================
-    Initialize Login Page
-=========================================*/
 
 window.addEventListener("load", () => {
 
     hideLoader();
 
+    checkExistingLogin();
+
     loadRememberedUser();
+
+    document
+        .getElementById("username")
+        .focus();
 
     document
         .getElementById("loginForm")
@@ -44,12 +46,12 @@ function loginUser(event){
 
     error.innerHTML = "";
 
-    if(username === ""){
+    if(username===""){
 
-        error.innerHTML = "Username is required.";
+        error.innerHTML="Please enter username.";
 
         showToast(
-            "Enter username",
+            "Username is required.",
             "warning"
         );
 
@@ -57,12 +59,12 @@ function loginUser(event){
 
     }
 
-    if(password === ""){
+    if(password===""){
 
-        error.innerHTML = "Password is required.";
+        error.innerHTML="Please enter password.";
 
         showToast(
-            "Enter password",
+            "Password is required.",
             "warning"
         );
 
@@ -70,18 +72,22 @@ function loginUser(event){
 
     }
 
-    loginBtn.disabled = true;
+    loginBtn.disabled=true;
 
-    loginBtn.innerHTML =
+    loginBtn.innerHTML=`
+    <i class="fas fa-spinner fa-spin"></i>
+    Logging in...
+    `;
 
-    `<i class="fa-solid fa-spinner fa-spin"></i>
-     Logging in...`;
+    showLoader();
 
     setTimeout(()=>{
 
+        hideLoader();
+
         if(
-            username === "admin" &&
-            password === "admin123"
+            username==="admin" &&
+            password==="admin123"
         ){
 
             localStorage.setItem(
@@ -110,36 +116,99 @@ function loginUser(event){
             }
 
             showToast(
-                "Login Successful!"
+                "Login Successful!",
+                "success"
             );
 
             setTimeout(()=>{
 
-                window.location.href =
+                window.location.href=
                 "dashboard.html";
 
             },800);
 
-        }else{
+        }
 
-            loginBtn.disabled = false;
+        else{
 
-            loginBtn.innerHTML =
+            loginBtn.disabled=false;
 
-            `<i class="fa-solid fa-right-to-bracket"></i>
-             <span>Login</span>`;
+            loginBtn.innerHTML=`
+            <i class="fas fa-right-to-bracket"></i>
+            <span>Login</span>
+            `;
 
-            error.innerHTML =
+            error.innerHTML=
             "Invalid username or password.";
 
             showToast(
-                "Invalid username or password",
+                "Invalid username or password.",
                 "error"
             );
+
+            document
+            .getElementById("password")
+            .value="";
+
+            document
+            .getElementById("password")
+            .focus();
 
         }
 
     },1000);
+
+}
+
+/*=========================================
+    Show / Hide Password
+=========================================*/
+
+function togglePassword(){
+
+    const password =
+    document.getElementById("password");
+
+    const icon =
+    document.getElementById("eyeIcon");
+
+    if(password.type==="password"){
+
+        password.type="text";
+
+        icon.classList.remove("fa-eye");
+
+        icon.classList.add("fa-eye-slash");
+
+    }
+
+    else{
+
+        password.type="password";
+
+        icon.classList.remove("fa-eye-slash");
+
+        icon.classList.add("fa-eye");
+
+    }
+
+}
+
+/*=========================================
+    Forgot Password
+=========================================*/
+
+function forgotPassword(){
+
+    alert(
+`Demo Login Credentials
+
+Username : admin
+
+Password : admin123
+
+For production,
+please contact the system administrator.`);
 
 }
 
@@ -168,92 +237,38 @@ function loadRememberedUser(){
 
 }
 
-/*====================================================
-    INI Logistics
-    login.js - Part 2
-====================================================*/
-
 /*=========================================
-    Show / Hide Password
+    Already Logged In
 =========================================*/
 
-function togglePassword(){
+function checkExistingLogin(){
 
-    const password =
-    document.getElementById("password");
+    if(localStorage.getItem("loggedIn")==="true"){
 
-    const eyeIcon =
-    document.getElementById("eyeIcon");
-
-    if(password.type === "password"){
-
-        password.type = "text";
-
-        eyeIcon.classList.remove("fa-eye");
-
-        eyeIcon.classList.add("fa-eye-slash");
-
-    }else{
-
-        password.type = "password";
-
-        eyeIcon.classList.remove("fa-eye-slash");
-
-        eyeIcon.classList.add("fa-eye");
+        window.location.href=
+        "dashboard.html";
 
     }
 
 }
 
 /*=========================================
-    Forgot Password
-=========================================*/
-
-function forgotPassword(){
-
-    showToast(
-        "Please contact the system administrator.",
-        "warning"
-    );
-
-}
-
-/*=========================================
-    Clear Error While Typing
-=========================================*/
-
-document
-.getElementById("username")
-.addEventListener("input", clearError);
-
-document
-.getElementById("password")
-.addEventListener("input", clearError);
-
-function clearError(){
-
-    document.getElementById(
-        "errorMessage"
-    ).innerHTML = "";
-
-}
-
-/*=========================================
-    Enter Key Support
+    Enter Key
 =========================================*/
 
 document.addEventListener(
 "keydown",
+
 function(event){
 
-    if(event.key === "Enter"){
+    if(event.key==="Enter"){
 
-        const form =
+        const form=
         document.getElementById(
             "loginForm"
         );
 
-        if(document.activeElement.form === form){
+        if(document.activeElement.form===form){
 
             event.preventDefault();
 
@@ -266,33 +281,24 @@ function(event){
 });
 
 /*=========================================
-    Auto Redirect
+    Clear Error While Typing
 =========================================*/
 
-function checkExistingLogin(){
+document
+.getElementById("username")
+.addEventListener("input",clearError);
 
-    if(localStorage.getItem("loggedIn")==="true"){
+document
+.getElementById("password")
+.addEventListener("input",clearError);
 
-        window.location.href =
-        "dashboard.html";
-
-    }
-
-}
-
-/*=========================================
-    Auto Focus
-=========================================*/
-
-window.addEventListener("load",()=>{
-
-    checkExistingLogin();
+function clearError(){
 
     document.getElementById(
-        "username"
-    ).focus();
+        "errorMessage"
+    ).innerHTML="";
 
-});
+}
 
 /*=========================================
     Developer Shortcut
@@ -300,6 +306,7 @@ window.addEventListener("load",()=>{
 
 document.addEventListener(
 "keydown",
+
 function(event){
 
     if(event.ctrlKey && event.key==="d"){
@@ -308,14 +315,14 @@ function(event){
 
         document.getElementById(
             "username"
-        ).value = "admin";
+        ).value="admin";
 
         document.getElementById(
             "password"
-        ).value = "admin123";
+        ).value="admin123";
 
         showToast(
-            "Demo credentials filled."
+            "Demo credentials loaded."
         );
 
     }
@@ -327,9 +334,5 @@ function(event){
 =========================================*/
 
 console.log(
-    "INI Logistics Login Module v2.0"
+"INI Logistics Login Module v3.0 Loaded"
 );
-
-/*====================================================
-    End login.js
-====================================================*/
