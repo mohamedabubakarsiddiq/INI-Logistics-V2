@@ -114,9 +114,13 @@ table.innerHTML += `
 
     <option value="Delivered" ${shipment.status === "Delivered" ? "selected" : ""}>Delivered</option>
 </select>
+
+<div class="progress-wrapper">
+    ${createProgressBar(shipment.status)}
+</div>
+
 </td>
 
-<td>${createProgressBar(shipment.status)}</td>
 
 <td>
 
