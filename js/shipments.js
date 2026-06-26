@@ -100,9 +100,20 @@ table.innerHTML += `
 <td>${shipment.estimatedDelivery}</td>
 
 <td>
-<span class="status ${badgeClass}">
-${shipment.status}
-</span>
+<select
+    class="status-dropdown"
+    onchange="updateStatus(${index}, this.value)"
+>
+    <option value="Shipment Created" ${shipment.status === "Shipment Created" ? "selected" : ""}>Shipment Created</option>
+
+    <option value="Picked Up" ${shipment.status === "Picked Up" ? "selected" : ""}>Picked Up</option>
+
+    <option value="In Transit" ${shipment.status === "In Transit" ? "selected" : ""}>In Transit</option>
+
+    <option value="Out For Delivery" ${shipment.status === "Out For Delivery" ? "selected" : ""}>Out For Delivery</option>
+
+    <option value="Delivered" ${shipment.status === "Delivered" ? "selected" : ""}>Delivered</option>
+</select>
 </td>
 
 <td>
@@ -387,4 +398,20 @@ a.download =
 
 a.click();
 
+}
+function updateStatus(index, status){
+
+    let shipments =
+    JSON.parse(localStorage.getItem("shipments")) || [];
+
+    shipments[index].status = status;
+
+    localStorage.setItem(
+        "shipments",
+        JSON.stringify(shipments)
+    );
+
+    loadShipments();
+
+    showToast("Shipment status updated successfully!");
 }
