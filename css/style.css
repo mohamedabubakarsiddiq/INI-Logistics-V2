@@ -871,6 +871,10 @@ font-size:18px;
 padding:40px 8%;
 }
 
+.progress-wrapper{
+    margin-top:6px;
+}
+
 .shipment-list-section h1{
 
 margin-bottom:20px;
