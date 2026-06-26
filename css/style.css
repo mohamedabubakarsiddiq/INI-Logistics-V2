@@ -893,17 +893,19 @@ color:#003366;`
 }
 
 .icon-btn{
-    width:34px;
-    height:34px;
+    width:36px;
+    height:36px;
     border:none;
     border-radius:50%;
     cursor:pointer;
-    margin:2px;
-    color:#fff;
+    margin:0 3px;
+    font-size:16px;
+    transition:.3s;
 }
 
 .view-btn{
     background:#0d6efd;
+    color:#fff;
 }
 
 .edit-btn{
@@ -913,6 +915,11 @@ color:#003366;`
 
 .delete-btn{
     background:#dc3545;
+    color:#fff;
+}
+
+.icon-btn:hover{
+    transform:scale(1.1);
 }
 
 .shipment-table tbody tr:hover{
