@@ -878,12 +878,71 @@ padding:40px 8%;
 .shipment-list-section h1{
 
 margin-bottom:20px;
-color:#003366;
+color:#003366;`
+}
+
+.filter-controls{
+    display:flex;
+    gap:15px;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.shipment-table tbody tr:nth-child(even){
+    background:#f8fafc;
+}
+
+.icon-btn{
+    width:34px;
+    height:34px;
+    border:none;
+    border-radius:50%;
+    cursor:pointer;
+    margin:2px;
+    color:#fff;
+}
+
+.view-btn{
+    background:#0d6efd;
+}
+
+.edit-btn{
+    background:#ffc107;
+    color:#000;
+}
+
+.delete-btn{
+    background:#dc3545;
+}
+
+.shipment-table tbody tr:hover{
+    background:#eef6ff;
+}
+
+.search-box{
+    flex:1;
+}
+
+.status-filter{
+    width:200px;
 }
 
 .table-container{
-    width:100%;
-    overflow-x:auto;
+
+background:#fff;
+padding:20px;
+border-radius:15px;
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+.table-container{
+
+background:#fff;
+padding:20px;
+border-radius:15px;
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+
 }
 
 #searchBox{
@@ -939,7 +998,8 @@ font-weight:bold;
 
 .shipment-table th,
 .shipment-table td{
-    padding:8px 6px;
+    padding:14px 10px;
+    font-size:14px;
     text-align:center;
     vertical-align:middle;
     overflow:hidden;
