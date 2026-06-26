@@ -1,31 +1,46 @@
 function login(){
 
-    let username =
-        document.getElementById("username").value.trim();
+    const username =
+    document.getElementById("username").value.trim();
 
-    let password =
-        document.getElementById("password").value.trim();
+    const password =
+    document.getElementById("password").value.trim();
 
-    let error =
-        document.getElementById("errorMessage");
+    const error =
+    document.getElementById("errorMessage");
 
-    if(
-        username === "admin" &&
-        password === "admin123"
-    ){
+    error.innerHTML = "";
 
-        sessionStorage.setItem(
-            "isLoggedIn",
+    if(username === "admin" && password === "admin123"){
+
+        localStorage.setItem(
+            "loggedIn",
             "true"
         );
 
-        window.location.href =
+        localStorage.setItem(
+            "loggedUser",
+            username
+        );
+
+        showToast("Login Successful!");
+
+        setTimeout(()=>{
+
+            window.location.href =
             "dashboard.html";
+
+        },800);
 
     }else{
 
         error.innerHTML =
-            "Invalid username or password";
+        "Invalid username or password.";
+
+        showToast(
+            "Invalid username or password",
+            "error"
+        );
 
     }
 
