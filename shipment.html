@@ -4,10 +4,11 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
 
-<title>New Shipment</title>
+<title>New Shipment | INI Logistics</title>
 
 <link rel="stylesheet"
       href="css/style.css">
@@ -16,206 +17,735 @@
 
 <body>
 
-<!-- Navbar -->
+<!-- ==========================
+        NAVIGATION
+=========================== -->
 
 <nav class="navbar">
 
 <div class="logo">
+
 <img src="images/logo.png"
      alt="INI Logistics">
+
 </div>
 
 <ul class="nav-links">
 
 <li><a href="dashboard.html">Dashboard</a></li>
-<li><a href="shipment.html">New Shipment</a></li>
-<li><a href="shipments.html">Shipments</a></li>
-<li><a href="tracking.html">Tracking</a></li>
-<li><a href="contact.html">Contact</a></li>
-<li><a href="reports.html">Reports</a></li>
-<li>
-<a href="customers.html">
+
+<li><a href="shipment.html" class="active">
+New Shipment
+</a></li>
+
+<li><a href="shipments.html">
+Shipments
+</a></li>
+
+<li><a href="tracking.html">
+Tracking
+</a></li>
+
+<li><a href="customers.html">
 Customers
+</a></li>
+
+<li><a href="reports.html">
+Reports
+</a></li>
+
+<li><a href="profile.html">
+Profile
+</a></li>
+
+<li>
+
+<a href="#"
+onclick="logout()">
+
+Logout
+
 </a>
+
 </li>
-<li><a href="#" onclick="logout()">Logout</a></li>
-<li><a href="profile.html">Profile</a></li>
+
 </ul>
 
 </nav>
 
-<!-- Form Section -->
+<!-- ==========================
+        PAGE HEADER
+=========================== -->
 
-<section class="shipment-section">
+<section class="page-header">
 
-<h1>Create Shipment</h1>
+<h1>
 
-<div class="shipment-form">
+📦 Create New Shipment
 
+</h1>
 
-<label>Shipment ID</label>
+<p>
+
+Enter shipment details to create a new shipment.
+
+</p>
+
+</section>
+
+<!-- ==========================
+        FORM
+=========================== -->
+
+<section class="shipment-form-section">
+
+<form
+id="shipmentForm"
+autocomplete="off">
+
+<!-- ==========================
+        SHIPMENT INFORMATION
+=========================== -->
+
+<div class="form-card">
+
+<h2>
+
+Shipment Information
+
+</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>
+
+Shipment ID
+
+</label>
+
 <input
 type="text"
 id="shipmentId"
 readonly>
 
-<label>Choose Customer</label>
-<select id="customerSelect">
-  <option value="">-- Select existing customer --</option>
+</div>
+
+<div class="form-group">
+
+<label>
+
+Booking Date
+
+</label>
+
+<input
+type="date"
+id="bookingDate"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>
+
+Priority
+
+</label>
+
+<select
+id="priority"
+required>
+
+<option value="Standard">
+Standard
+</option>
+
+<option value="Express">
+Express
+</option>
+
+<option value="Urgent">
+Urgent
+</option>
+
 </select>
 
-<label>Sender Name</label>
+</div>
+
+<div class="form-group">
+
+<label>
+
+Package Type
+
+</label>
+
+<select
+id="packageType"
+required>
+
+<option value="">
+Select Package
+</option>
+
+<option>
+Documents
+</option>
+
+<option>
+Parcel
+</option>
+
+<option>
+Electronics
+</option>
+
+<option>
+Fragile
+</option>
+
+<option>
+Furniture
+</option>
+
+<option>
+Medical
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ==========================
+        SENDER
+=========================== -->
+
+<div class="form-card">
+
+<h2>
+
+Sender Information
+
+</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>
+
+Sender Name
+
+</label>
+
 <input
 type="text"
 id="sender"
-placeholder="Sender Name">
+required>
 
-<label>Sender Phone</label>
+</div>
+
+<div class="form-group">
+
+<label>
+
+Phone
+
+</label>
+
 <input
-type="text"
+type="tel"
 id="senderPhone"
-placeholder="Sender Phone Number">
+maxlength="10"
+required>
 
-<label>Receiver Name</label>
-<input
-type="text"
-id="receiver"
-placeholder="Receiver Name">
+</div>
 
-<label>Receiver Phone</label>
-<input
-type="text"
-id="receiverPhone"
-placeholder="Receiver Phone Number">
+<div class="form-group full-width">
 
-<label>Email</label>
-<input
-type="email"
-id="email"
-placeholder="Customer Email">
+<label>
 
-<label>Address</label>
+Address
+
+</label>
+
 <textarea
-id="address"
-placeholder="Delivery Address">
-</textarea>
+id="senderAddress"
+rows="3"
+required></textarea>
 
-<label>Origin</label>
+</div>
+
+<div class="form-group">
+
+<label>
+
+Origin City
+
+</label>
+
 <input
 type="text"
 id="origin"
-placeholder="Origin">
+required>
 
-<label>Destination</label>
+</div>
+
+</div>
+
+</div>
+
+<!-- ==========================
+        RECEIVER
+=========================== -->
+
+<div class="form-card">
+
+<h2>
+
+Receiver Information
+
+</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>
+
+Receiver Name
+
+</label>
+
+<input
+type="text"
+id="receiver"
+required>
+
+</div>
+
+<div class="form-group">
+
+<label>
+
+Phone
+
+</label>
+
+<input
+type="tel"
+id="receiverPhone"
+maxlength="10"
+required>
+
+</div>
+
+<div class="form-group full-width">
+
+<label>
+
+Delivery Address
+
+</label>
+
+<textarea
+id="receiverAddress"
+rows="3"
+required></textarea>
+
+</div>
+
+<div class="form-group">
+
+<label>
+
+Destination City
+
+</label>
+
 <input
 type="text"
 id="destination"
-placeholder="Destination">
+required>
 
+</div>
 
-<label>Weight (KG)</label>
+</div>
+
+</div>
+
+<!-- ==========================
+        PACKAGE DETAILS
+=========================== -->
+
+<div class="form-card">
+
+<h2>
+
+📦 Package Details
+
+</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>
+
+Weight (KG)
+
+</label>
+
 <input
 type="number"
 id="weight"
-placeholder="Weight (KG)">
+min="1"
+step="0.1"
+required>
 
+</div>
 
+<div class="form-group">
 
-<label>Package Type</label>
+<label>
 
-<select id="packageType">
-<option>Documents</option>
-<option>Parcels</option>
-<option>Electronics</option>
-<option>Fragile Goods</option>
-</select>
+Length (cm)
 
-<label>Shipping Cost (₹)</label>
+</label>
+
+<input
+type="number"
+id="length"
+min="1">
+
+</div>
+
+<div class="form-group">
+
+<label>
+
+Width (cm)
+
+</label>
+
+<input
+type="number"
+id="width"
+min="1">
+
+</div>
+
+<div class="form-group">
+
+<label>
+
+Height (cm)
+
+</label>
+
+<input
+type="number"
+id="height"
+min="1">
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ==========================
+        SHIPPING DETAILS
+=========================== -->
+
+<div class="form-card">
+
+<h2>
+
+🚚 Shipping Details
+
+</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>
+
+Shipping Cost (₹)
+
+</label>
 
 <input
 type="number"
 id="cost"
-placeholder="Shipping Cost">
-
-<label>Priority</label>
-
-<select id="priority">
-<option>Standard</option>
-<option>Express</option>
-<option>Urgent</option>
-</select>
-
-<label>Status</label>
-<select id="status">
-  <option>Shipment Created</option>
-  <option>Picked Up</option>
-  <option>In Transit</option>
-  <option>Out For Delivery</option>
-  <option>Delivered</option>
-</select>
-
-<label>Special Instructions</label>
-
-<textarea
-id="notes"
-placeholder="Fragile, Handle With Care, etc.">
-</textarea>
-
-
-<button type="button" id="createShipmentBtn">
-Create Shipment
-</button>
-
-<div id="message"></div>
+readonly>
 
 </div>
 
+<div class="form-group">
+
+<label>
+
+Estimated Delivery
+
+</label>
+
+<input
+type="date"
+id="estimatedDelivery"
+readonly>
+
+</div>
+
+<div class="form-group">
+
+<label>
+
+Initial Status
+
+</label>
+
+<select
+id="status">
+
+<option value="Shipment Created" selected>
+Shipment Created
+</option>
+
+<option value="Picked Up">
+Picked Up
+</option>
+
+<option value="In Transit">
+In Transit
+</option>
+
+<option value="Out For Delivery">
+Out For Delivery
+</option>
+
+<option value="Delivered">
+Delivered
+</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>
+
+Payment Status
+
+</label>
+
+<select
+id="paymentStatus">
+
+<option value="Pending">
+Pending
+</option>
+
+<option value="Paid">
+Paid
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ==========================
+        REMARKS
+=========================== -->
+
+<div class="form-card">
+
+<h2>
+
+📝 Additional Notes
+
+</h2>
+
+<textarea
+id="remarks"
+rows="5"
+placeholder="Enter special instructions or remarks..."></textarea>
+
+</div>
+
+<!-- ==========================
+        ATTACHMENT
+=========================== -->
+
+<div class="form-card">
+
+<h2>
+
+📎 Upload Document
+
+</h2>
+
+<input
+type="file"
+id="attachment"
+accept=".pdf,.jpg,.jpeg,.png">
+
+<p class="helper-text">
+
+Optional: Upload invoice, shipping label or package image.
+
+</p>
+
+</div>
+
+<!-- ==========================
+        BUTTONS
+=========================== -->
+
+<div class="form-actions">
+
+<button
+type="submit"
+class="save-btn">
+
+💾 Create Shipment
+
+</button>
+
+<button
+type="button"
+class="secondary-btn"
+onclick="saveDraft()">
+
+📂 Save Draft
+
+</button>
+
+<button
+type="reset"
+class="reset-btn">
+
+🔄 Reset
+
+</button>
+
+</div>
+
+</form>
+
 </section>
 
-
-
-<!-- Load shared main.js first so checkLogin and helpers exist -->
-<script src="js/main.js"></script>
-<script src="js/script.js"></script>
-
-<script>
-if (typeof checkLogin === 'function') checkLogin();
-if (typeof initializeShipmentPage === 'function') initializeShipmentPage();
-</script>
+<!-- Toast -->
 
 <div id="toast"></div>
+
+<!-- Loader -->
+
+<div id="loader" class="loader"></div>
+
+<!-- ==========================
+        FOOTER
+=========================== -->
 
 <footer class="footer">
 
 <div class="footer-content">
 
 <div>
-<h3>INI Logistics</h3>
-<p>Delivering Excellence Worldwide</p>
+
+<h3>
+
+INI Logistics
+
+</h3>
+
+<p>
+
+Delivering Excellence Worldwide
+
+</p>
+
 </div>
 
 <div>
-<h4>Quick Links</h4>
+
+<h4>
+
+Quick Links
+
+</h4>
+
 <ul>
+
 <li><a href="dashboard.html">Dashboard</a></li>
-<li><a href="shipment.html">Shipments</a></li>
+
+<li><a href="shipments.html">Shipments</a></li>
+
 <li><a href="tracking.html">Tracking</a></li>
+
 </ul>
+
 </div>
 
 <div>
-<h4>Contact</h4>
-<p>support@inilogistics.com</p>
-<p>+91 98407 03914</p>
+
+<h4>
+
+Contact
+
+</h4>
+
+<p>
+
+support@inilogistics.com
+
+</p>
+
+<p>
+
++91 98407 03914
+
+</p>
+
 </div>
 
 </div>
 
 <div class="copyright">
+
 © 2026 INI Logistics. All Rights Reserved.
+
 </div>
 
 </footer>
+
+<!-- ==========================
+        JAVASCRIPT
+=========================== -->
+
+<script src="js/main.js"></script>
+<script src="js/shipment.js"></script>
+
+<script>
+
+checkLogin();
+
+initializeShipmentForm();
+
+</script>
 
 </body>
 
