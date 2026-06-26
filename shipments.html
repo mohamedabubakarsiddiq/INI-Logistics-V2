@@ -57,7 +57,7 @@ Logout
 <input
 type="text"
 id="searchBox"
-placeholder="Search Shipment..."
+placeholder="Search by ID, Sender or Receiver..."
 onkeyup="searchShipment()"
 class="search-box">
 
@@ -106,6 +106,8 @@ onclick="exportToExcel()">
 
 </div>
 
+<div class="table-container">
+      
 <table class="shipment-table">
 
 <thead>
@@ -125,6 +127,12 @@ onclick="exportToExcel()">
 <th>Actions</th>
 </tr>
 
+<button class="edit-btn">✏️ Edit</button>
+
+<button class="delete-btn">🗑 Delete</button>
+
+<button class="view-btn">👁 View</button>
+      
 </thead>
 
 <tbody id="shipmentTable">
@@ -133,7 +141,11 @@ onclick="exportToExcel()">
 
 </table>
 
+</div>
 </section>
+      <p id="noData" class="no-data" style="display:none;">
+    No shipments found.
+</p>
 
 <div id="toast"></div>
 
@@ -174,6 +186,8 @@ loadShipments();
 <div class="copyright">
 © 2026 INI Logistics. All Rights Reserved.
 </div>
+
+</footer>
 
 </body>
 
