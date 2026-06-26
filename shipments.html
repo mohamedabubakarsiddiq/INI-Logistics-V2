@@ -79,6 +79,8 @@ class="search-box">
 
 </div>
 
+<div class="top-actions">
+      
 <div class="shipment-summary">
 
 <h3>
@@ -104,6 +106,7 @@ onclick="exportToExcel()">
 
 </button>
 
+</div>
 </div>
 
 <div class="table-container">
@@ -132,6 +135,25 @@ onclick="exportToExcel()">
 <tbody id="shipmentTable">
 
 </tbody>
+
+      <td>
+
+<button class="icon-btn view-btn"
+onclick="viewShipment(${index})">
+👁
+</button>
+
+<button class="icon-btn edit-btn"
+onclick="editShipment(${index})">
+✏️
+</button>
+
+<button class="icon-btn delete-btn"
+onclick="deleteShipment(${index})">
+🗑
+</button>
+
+</td>
 
 </table>
 
