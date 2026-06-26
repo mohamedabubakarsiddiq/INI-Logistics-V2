@@ -7,28 +7,56 @@
     Session Management
 =========================================*/
 
-function login(username){
+function loginUser(event){
 
-    localStorage.setItem("loggedIn","true");
+    event.preventDefault();
 
-    localStorage.setItem(
-        "loggedUser",
-        username || "Administrator"
-    );
+    const username =
+    document.getElementById("username").value.trim();
+
+    const password =
+    document.getElementById("password").value.trim();
+
+    if(username === "admin" && password === "admin123"){
+
+        localStorage.setItem("loggedIn","true");
+
+        localStorage.setItem("loggedUser",username);
+
+        showToast("Login Successful");
+
+        setTimeout(()=>{
+
+            window.location.href="dashboard.html";
+
+        },1000);
+
+    }else{
+
+        showToast("Invalid Username or Password","error");
+
+    }
+
+}
+
+function checkLogin(){
+
+    if(localStorage.getItem("loggedIn") !== "true"){
+
+        window.location.href="index.html";
+
+    }
 
 }
 
 function logout(){
 
-    if(!confirm(
-        "Are you sure you want to logout?"
-    )) return;
+    if(!confirm("Are you sure you want to logout?")) return;
 
     localStorage.removeItem("loggedIn");
-
     localStorage.removeItem("loggedUser");
 
-    window.location.href = "index.html";
+    window.location.href="index.html";
 
 }
 
