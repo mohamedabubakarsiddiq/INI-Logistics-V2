@@ -1,148 +1,740 @@
-// js/dashboard.js
-// Cleaned and consolidated dashboard logic
+/*====================================================
+    INI Logistics Dashboard
+    dashboard.js - Part 1
+====================================================*/
+
+let revenueChart = null;
+let shipmentChart = null;
+
+/*=========================================
+    Dashboard Loader
+=========================================*/
 
 function loadDashboard(){
-  // Welcome message (optional element)
-  const welcomeEl = document.getElementById("welcomeMessage");
-  if(welcomeEl){
-    welcomeEl.innerText = "Welcome Back, Logistics Administrator";
-  }
 
-  const shipments = JSON.parse(localStorage.getItem("shipments")) || [];
-  const total = shipments.length;
-  const delivered = shipments.filter(s => s.status === "Delivered").length;
-  const transit = shipments.filter(s => s.status === "In Transit").length;
-  const pending = Math.max(0, total - delivered - transit);
+    try{
 
-  const setIfExists = (id, value) => {
-    const el = document.getElementById(id);
-    if(el) el.innerText = value;
-  };
+        const shipments =
+        JSON.parse(localStorage.getItem("shipments")) || [];
 
-  setIfExists("totalShipments", total);
-  setIfExists("deliveredShipments", delivered);
-  setIfExists("transitShipments", transit);
-  setIfExists("pendingShipments", pending);
+        const customers =
+        JSON.parse(localStorage.getItem("customers")) || [];
 
-  // Today stats (if shipments have a createdAt property)
-  const today = new Date().toDateString();
-  const todayShipmentsCount = shipments.filter(s => s.createdAt && new Date(s.createdAt).toDateString() === today).length;
-  const todayDeliveredCount = shipments.filter(s => s.createdAt && s.status === "Delivered" && new Date(s.createdAt).toDateString() === today).length;
-  setIfExists("todayShipments", todayShipmentsCount);
-  setIfExists("todayDelivered", todayDeliveredCount);
+        updateDashboardCards(shipments, customers);
 
-  // Recent Shipments (last 5)
-  const table = document.getElementById("recentTable");
-  if(table){
-    if(shipments.length === 0){
-      table.innerHTML = `\n<tr><td colspan="5">No Shipments Available</td></tr>\n`;
-    } else {
-      table.innerHTML = "";
-      shipments.slice(-5).reverse().forEach(sh => {
-        table.innerHTML += `\n<tr>\n<td>${sh.id || "-"}</td>\n<td>${sh.sender || "-"}</td>\n<td>${sh.receiver || "-"}</td>\n<td>${sh.destination || "-"}</td>\n<td>${sh.status || "-"}</td>\n</tr>\n`;
-      });
-    }
-  }
+        loadRecentShipments(shipments);
 
-  // Revenue
-  const revenue = shipments.reduce((acc, s) => acc + Number(s.cost || 0), 0);
-  setIfExists("totalRevenue", "₹" + revenue);
+        loadRecentActivity(shipments);
 
-  // Customers
-  const customers = JSON.parse(localStorage.getItem("customers")) || [];
-  setIfExists("totalCustomers", customers.length);
+        createRevenueChart(shipments);
 
-  // Current date
-  const currentDateEl = document.getElementById("currentDate");
-  if(currentDateEl) currentDateEl.innerHTML = new Date().toDateString();
+        createShipmentChart(shipments);
 
-  // Counters animation (optional)
-  const counters = document.querySelectorAll(".counter");
-  counters.forEach(counter => {
-    const update = () => {
-      const target = +counter.dataset.target || 0;
-      const count = +counter.innerText || 0;
-      const speed = Math.max(1, target / 100);
-      if(count < target){
-        counter.innerText = Math.ceil(count + speed);
-        setTimeout(update, 20);
-      } else {
-        counter.innerText = target;
-      }
-    };
-    update();
-  });
+        updateCurrentDate();
 
-  // Charts: ensure unique canvas IDs and create/update charts only once
-  try{
-    // Shipment status chart
-    const shipmentCanvas = document.getElementById("shipmentChart");
-    if(shipmentCanvas){
-      const shipmentData = [delivered, transit, pending];
-      if(window.shipmentChartInstance){
-        // update existing
-        window.shipmentChartInstance.data.datasets[0].data = shipmentData;
-        window.shipmentChartInstance.update();
-      } else {
-        window.shipmentChartInstance = new Chart(shipmentCanvas, {
-          type: 'pie',
-          data: {
-            labels: ["Delivered", "In Transit", "Pending"],
-            datasets: [{
-              data: shipmentData,
-              backgroundColor: ['#4caf50', '#2196f3', '#ff9800']
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        });
-      }
+        updateLastUpdated();
+
     }
 
-    // Revenue chart
-    const revenueCanvas = document.getElementById("revenueChart");
-    if(revenueCanvas){
-      const cap = 100000;
-      const remaining = Math.max(0, cap - revenue);
-      const revenueData = [revenue, remaining];
+    catch(error){
 
-      if(window.revenueChartInstance){
-        window.revenueChartInstance.data.datasets[0].data = revenueData;
-        window.revenueChartInstance.update();
-      } else {
-        window.revenueChartInstance = new Chart(revenueCanvas, {
-          type: 'doughnut',
-          data: {
-            labels: ["Revenue", "Remaining"],
-            datasets: [{
-              data: revenueData,
-              backgroundColor: ['#ff6384', '#e9ecef']
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        });
-      }
+        console.error(error);
+
+        showToast("Unable to load dashboard.");
+
     }
-  } catch(e){
-    console.error('Chart init error', e);
-  }
+
 }
 
-// Page load routing
-window.addEventListener('load', function(){
-  const path = window.location.pathname || '';
-  if(path.includes('dashboard.html') || path === '/' || path.endsWith('/')){
+/*=========================================
+    Dashboard Cards
+=========================================*/
+
+function updateDashboardCards(shipments, customers){
+
+    const total =
+    shipments.length;
+
+    const delivered =
+    shipments.filter(s=>s.status==="Delivered").length;
+
+    const transit =
+    shipments.filter(s=>s.status==="In Transit").length;
+
+    const pending =
+    shipments.filter(s=>
+        s.status==="Shipment Created" ||
+        s.status==="Picked Up" ||
+        s.status==="Out For Delivery"
+    ).length;
+
+    const today =
+    getTodayShipments(shipments);
+
+    const revenue =
+    calculateRevenue(shipments);
+
+    const rate =
+    total===0
+    ?0
+    :Math.round((delivered/total)*100);
+
+    animateCounter(
+        "totalShipments",
+        total
+    );
+
+    animateCounter(
+        "deliveredShipments",
+        delivered
+    );
+
+    animateCounter(
+        "transitShipments",
+        transit
+    );
+
+    animateCounter(
+        "pendingShipments",
+        pending
+    );
+
+    animateCounter(
+        "todayShipments",
+        today
+    );
+
+    animateCounter(
+        "totalCustomers",
+        customers.length
+    );
+
+    document.getElementById(
+        "deliveryRate"
+    ).innerText = rate + "%";
+
+    document.getElementById(
+        "totalRevenue"
+    ).innerText =
+    "₹" + revenue.toLocaleString("en-IN");
+
+}
+
+/*=========================================
+    Revenue
+=========================================*/
+
+function calculateRevenue(shipments){
+
+    return shipments.reduce((sum, shipment)=>{
+
+        return sum +
+        Number(shipment.cost || 0);
+
+    },0);
+
+}
+
+/*=========================================
+    Today's Shipments
+=========================================*/
+
+function getTodayShipments(shipments){
+
+    const today =
+    new Date().toISOString().split("T")[0];
+
+    return shipments.filter(shipment=>{
+
+        return shipment.date === today;
+
+    }).length;
+
+}
+
+/*=========================================
+    Counter Animation
+=========================================*/
+
+function animateCounter(id, value){
+
+    const element =
+    document.getElementById(id);
+
+    if(!element) return;
+
+    let current = 0;
+
+    const increment =
+    Math.max(1, Math.ceil(value/40));
+
+    const timer =
+    setInterval(()=>{
+
+        current += increment;
+
+        if(current >= value){
+
+            current = value;
+
+            clearInterval(timer);
+
+        }
+
+        element.innerText =
+        current.toLocaleString("en-IN");
+
+    },20);
+
+}
+
+/*=========================================
+    Date
+=========================================*/
+
+function updateCurrentDate(){
+
+    const element =
+    document.getElementById("currentDate");
+
+    if(!element) return;
+
+    element.innerText =
+    new Date().toLocaleDateString(
+        "en-IN",
+        {
+            weekday:"long",
+            day:"numeric",
+            month:"long",
+            year:"numeric"
+        }
+    );
+
+}
+
+/*=========================================
+    Last Updated
+=========================================*/
+
+function updateLastUpdated(){
+
+    const element =
+    document.getElementById("lastUpdated");
+
+    if(!element) return;
+
+    element.innerText =
+    "Last Updated : " +
+    new Date().toLocaleTimeString();
+
+}
+/*====================================================
+    Charts
+====================================================*/
+
+/*=========================================
+    Monthly Revenue Chart
+=========================================*/
+
+function createRevenueChart(shipments){
+
+    const ctx =
+    document.getElementById("revenueChart");
+
+    if(!ctx) return;
+
+    const monthlyRevenue =
+    new Array(12).fill(0);
+
+    shipments.forEach(shipment=>{
+
+        const amount =
+        Number(shipment.cost || 0);
+
+        let month =
+        new Date().getMonth();
+
+        if(shipment.date){
+
+            const d =
+            new Date(shipment.date);
+
+            if(!isNaN(d)){
+                month = d.getMonth();
+            }
+
+        }
+
+        monthlyRevenue[month] += amount;
+
+    });
+
+    if(revenueChart){
+
+        revenueChart.destroy();
+
+    }
+
+    revenueChart =
+    new Chart(ctx,{
+
+        type:"bar",
+
+        data:{
+
+            labels:[
+                "Jan","Feb","Mar","Apr","May","Jun",
+                "Jul","Aug","Sep","Oct","Nov","Dec"
+            ],
+
+            datasets:[{
+
+                label:"Revenue",
+
+                data:monthlyRevenue,
+
+                borderWidth:1,
+
+                borderRadius:8,
+
+                backgroundColor:[
+                    "#0d6efd","#0d6efd","#0d6efd",
+                    "#0d6efd","#0d6efd","#0d6efd",
+                    "#198754","#198754","#198754",
+                    "#198754","#198754","#198754"
+                ]
+
+            }]
+
+        },
+
+        options:{
+
+            responsive:true,
+
+            maintainAspectRatio:false,
+
+            plugins:{
+
+                legend:{
+                    display:false
+                }
+
+            },
+
+            scales:{
+
+                y:{
+                    beginAtZero:true
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+/*=========================================
+    Shipment Status Chart
+=========================================*/
+
+function createShipmentChart(shipments){
+
+    const ctx =
+    document.getElementById("shipmentChart");
+
+    if(!ctx) return;
+
+    const created =
+    shipments.filter(s=>s.status==="Shipment Created").length;
+
+    const picked =
+    shipments.filter(s=>s.status==="Picked Up").length;
+
+    const transit =
+    shipments.filter(s=>s.status==="In Transit").length;
+
+    const delivery =
+    shipments.filter(s=>s.status==="Out For Delivery").length;
+
+    const delivered =
+    shipments.filter(s=>s.status==="Delivered").length;
+
+    if(shipmentChart){
+
+        shipmentChart.destroy();
+
+    }
+
+    shipmentChart =
+    new Chart(ctx,{
+
+        type:"doughnut",
+
+        data:{
+
+            labels:[
+
+                "Created",
+                "Picked Up",
+                "In Transit",
+                "Out For Delivery",
+                "Delivered"
+
+            ],
+
+            datasets:[{
+
+                data:[
+
+                    created,
+                    picked,
+                    transit,
+                    delivery,
+                    delivered
+
+                ],
+
+                backgroundColor:[
+
+                    "#6c757d",
+                    "#17a2b8",
+                    "#0d6efd",
+                    "#fd7e14",
+                    "#198754"
+
+                ],
+
+                borderWidth:2
+
+            }]
+
+        },
+
+        options:{
+
+            responsive:true,
+
+            maintainAspectRatio:false,
+
+            plugins:{
+
+                legend:{
+                    position:"bottom"
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+/*=========================================
+    Refresh Dashboard
+=========================================*/
+
+function refreshDashboard(){
+
+    showLoader();
+
+    setTimeout(()=>{
+
+        loadDashboard();
+
+        hideLoader();
+
+        showToast(
+            "Dashboard refreshed successfully!"
+        );
+
+    },700);
+
+}
+
+/*=========================================
+    Auto Refresh
+=========================================*/
+
+setInterval(()=>{
+
+    if(document.visibilityState==="visible"){
+
+        loadDashboard();
+
+    }
+
+},60000);
+/*====================================================
+    Recent Shipments
+====================================================*/
+
+function loadRecentShipments(shipments){
+
+    const table =
+    document.getElementById("recentTable");
+
+    if(!table) return;
+
+    table.innerHTML = "";
+
+    if(shipments.length === 0){
+
+        table.innerHTML = `
+        <tr>
+            <td colspan="5">
+                No Shipments Available
+            </td>
+        </tr>
+        `;
+
+        return;
+    }
+
+    const recent =
+    [...shipments].reverse().slice(0,5);
+
+    recent.forEach(shipment=>{
+
+        table.innerHTML += `
+
+        <tr>
+
+            <td>${shipment.id}</td>
+
+            <td>${shipment.sender}</td>
+
+            <td>${shipment.receiver}</td>
+
+            <td>${shipment.destination}</td>
+
+            <td>
+
+                <span class="status-badge ${getStatusClass(shipment.status)}">
+
+                    ${shipment.status}
+
+                </span>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+/*====================================================
+    Recent Activity
+====================================================*/
+
+function loadRecentActivity(shipments){
+
+    const feed =
+    document.getElementById("activityFeed");
+
+    if(!feed) return;
+
+    feed.innerHTML = "";
+
+    if(shipments.length === 0){
+
+        feed.innerHTML = `
+
+        <div class="activity-item">
+
+            <div class="activity-icon">
+
+                📦
+
+            </div>
+
+            <div>
+
+                <h4>
+
+                    No Recent Activity
+
+                </h4>
+
+                <p>
+
+                    Create your first shipment.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        `;
+
+        return;
+
+    }
+
+    [...shipments]
+    .reverse()
+    .slice(0,5)
+    .forEach(shipment=>{
+
+        feed.innerHTML += `
+
+        <div class="activity-item">
+
+            <div class="activity-icon">
+
+                🚚
+
+            </div>
+
+            <div>
+
+                <h4>
+
+                    ${shipment.id}
+
+                </h4>
+
+                <p>
+
+                    ${shipment.sender}
+
+                    →
+
+                    ${shipment.receiver}
+
+                </p>
+
+                <small>
+
+                    ${shipment.status}
+
+                </small>
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+/*====================================================
+    Status Badge
+====================================================*/
+
+function getStatusClass(status){
+
+    switch(status){
+
+        case "Shipment Created":
+            return "created";
+
+        case "Picked Up":
+            return "picked";
+
+        case "In Transit":
+            return "transit";
+
+        case "Out For Delivery":
+            return "delivery";
+
+        case "Delivered":
+            return "delivered";
+
+        default:
+            return "";
+    }
+
+}
+
+/*====================================================
+    Notifications
+====================================================*/
+
+function showNotification(){
+
+    const shipments =
+    JSON.parse(localStorage.getItem("shipments")) || [];
+
+    const pending =
+    shipments.filter(s=>s.status !== "Delivered").length;
+
+    showToast(
+
+        pending===0
+
+        ?
+
+        "🎉 All shipments delivered."
+
+        :
+
+        `${pending} shipment(s) require attention.`
+
+    );
+
+}
+
+/*====================================================
+    Update Notification Count
+====================================================*/
+
+function updateNotificationCount(){
+
+    const shipments =
+    JSON.parse(localStorage.getItem("shipments")) || [];
+
+    const pending =
+    shipments.filter(
+        s=>s.status!=="Delivered"
+    ).length;
+
+    const badge =
+    document.getElementById("notifyCount");
+
+    if(badge){
+
+        badge.innerText = pending;
+
+    }
+
+}
+
+/*====================================================
+    Dashboard Initialization
+====================================================*/
+
+window.addEventListener("load",()=>{
+
+    updateNotificationCount();
+
     loadDashboard();
-  }
-  if(path.includes('shipment.html') && typeof initializeShipmentPage === 'function'){
-    initializeShipmentPage();
-  }
-  if(path.includes('shipments.html') && typeof loadShipments === 'function'){
-    loadShipments();
-  }
+
 });
+
+/*====================================================
+    Dashboard Refresh Button
+====================================================*/
+
+document.addEventListener("visibilitychange",()=>{
+
+    if(document.visibilityState==="visible"){
+
+        loadDashboard();
+
+    }
+
+});
+
+/*====================================================
+    End dashboard.js
+====================================================*/
