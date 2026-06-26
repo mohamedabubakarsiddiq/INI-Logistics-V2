@@ -1169,3 +1169,61 @@ border-collapse:collapse;
   .modal-grid { grid-template-columns: 1fr; }
   .toast-item { min-width: 180px; max-width: 92vw; right: 10px; left: 10px; }
 }
+.status-dropdown{
+
+width:170px;
+padding:8px;
+border:none;
+border-radius:20px;
+font-weight:600;
+cursor:pointer;
+text-align:center;
+outline:none;
+transition:.3s;
+
+}
+
+/* Shipment Created */
+
+.status-dropdown.created{
+
+background:#dbeafe;
+color:#1d4ed8;
+
+}
+
+/* Picked Up */
+
+.status-dropdown.picked{
+
+background:#fff3cd;
+color:#856404;
+
+}
+
+/* In Transit */
+
+.status-dropdown.transit{
+
+background:#cff4fc;
+color:#055160;
+
+}
+
+/* Out For Delivery */
+
+.status-dropdown.delivery{
+
+background:#ffe5b4;
+color:#8a4b00;
+
+}
+
+/* Delivered */
+
+.status-dropdown.delivered{
+
+background:#d1e7dd;
+color:#146c43;
+
+}
