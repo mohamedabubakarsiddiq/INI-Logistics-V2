@@ -43,7 +43,7 @@ function checkLogin(){
 
     if(localStorage.getItem("loggedIn") !== "true"){
 
-        window.location.href="index.html";
+        window.location.href = "login.html";
 
     }
 
@@ -51,12 +51,16 @@ function checkLogin(){
 
 function logout(){
 
-    if(!confirm("Are you sure you want to logout?")) return;
+    if(!confirm("Are you sure you want to logout?")){
+
+        return;
+
+    }
 
     localStorage.removeItem("loggedIn");
     localStorage.removeItem("loggedUser");
 
-    window.location.href="index.html";
+    window.location.href = "login.html";
 
 }
 
