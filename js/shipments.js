@@ -97,6 +97,9 @@ table.innerHTML += `
 
 <td>₹${shipment.cost || 0}</td>
 
+const cost = Number(shipment.cost).toLocaleString("en-IN");
+<td>${cost}</td>
+
 <td>${shipment.estimatedDelivery}</td>
 
 <td>
@@ -124,22 +127,22 @@ table.innerHTML += `
 
 <td>
 
-<button
-class="action-btn"
-onclick="viewShipment(${index})">
-View
+<button class="icon-btn view-btn"
+onclick="viewShipment(${index})"
+title="View Shipment">
+👁
 </button>
 
-<button
-class="action-btn edit-btn"
-onclick="editShipment(${index})">
-Edit
+<button class="icon-btn edit-btn"
+onclick="editShipment(${index})"
+title="Edit Shipment">
+✏️
 </button>
 
-<button
-class="action-btn delete-btn"
-onclick="deleteShipment(${index})">
-Delete
+<button class="icon-btn delete-btn"
+onclick="deleteShipment(${index})"
+title="Delete Shipment">
+🗑
 </button>
 
 </td>
