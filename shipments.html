@@ -52,13 +52,16 @@ Logout
 
 <h1>Shipment Management</h1>
 
+<div class="filter-controls">
+
 <input
 type="text"
 id="searchBox"
 placeholder="Search Shipment..."
-onkeyup="searchShipment()">
+onkeyup="searchShipment()"
+class="search-box">
 
-<select id="statusFilter" onchange="filterShipments()">
+<select id="statusFilter" onchange="filterShipments()" class="status-filter">
 
 <option value="">All Status</option>
 
@@ -74,6 +77,8 @@ onkeyup="searchShipment()">
 
 </select>
 
+</div>
+
 <div class="shipment-summary">
 
 <h3>
@@ -85,19 +90,23 @@ Total Shipments:
 
 </div>
 
+<div class="action-buttons-section">
+
 <button onclick="exportCSV()" class="export-btn">
 📥 Export CSV
 </button>
 
 <button
-class="refresh-btn"
+class="export-excel-btn"
 onclick="exportToExcel()">
 
 📊 Export Excel
 
 </button>
 
-<table>
+</div>
+
+<table class="shipment-table">
 
 <thead>
 
@@ -126,6 +135,7 @@ onclick="exportToExcel()">
 
 </section>
 
+<div id="toast"></div>
 
 <script src="js/main.js"></script>
 <script src="js/shipments.js"></script>
@@ -134,8 +144,6 @@ onclick="exportToExcel()">
 checkLogin();
 loadShipments();
 </script>
-
-<div id="toast"></div>
 
 <footer class="footer">
 
