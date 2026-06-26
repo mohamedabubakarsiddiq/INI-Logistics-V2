@@ -19,11 +19,6 @@ if(!table) return;
 
 table.innerHTML = "";
 
-if (shipments.length === 0) {
-    document.getElementById("noData").style.display = "block";
-} else {
-    document.getElementById("noData").style.display = "none";
-}
 
 if(shipments.length === 0){
 
@@ -141,28 +136,20 @@ Delete
 }
 function deleteShipment(index){
 
-let shipments =
-JSON.parse(
-localStorage.getItem("shipments")
-) || [];
+    let shipments =
+    JSON.parse(localStorage.getItem("shipments")) || [];
 
-if(confirm("Are you sure you want to delete this shipment?")){
+    if(confirm("Are you sure you want to delete this shipment?")){
 
-        // delete code
-}
-}
+        shipments.splice(index,1);
 
-shipments.splice(index,1);
+        localStorage.setItem(
+            "shipments",
+            JSON.stringify(shipments)
+        );
 
-localStorage.setItem(
-"shipments",
-JSON.stringify(shipments)
-);
-
-loadShipments();
-
-}
-
+        loadShipments();
+    }
 }
 function searchShipment(){
 
