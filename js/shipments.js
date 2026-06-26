@@ -404,14 +404,55 @@ function updateStatus(index, status){
     let shipments =
     JSON.parse(localStorage.getItem("shipments")) || [];
 
-    shipments[index].status = status;
+    shipments[index].status = element.value;
 
     localStorage.setItem(
         "shipments",
         JSON.stringify(shipments)
     );
 
+    setStatusColor(element);
     loadShipments();
 
     showToast("Shipment status updated successfully!");
+}
+document.querySelectorAll(".status-dropdown").forEach(select=>{
+    setStatusColor(select)
+});
+
+
+function setStatusColor(select){
+
+    select.classList.remove(
+        "created",
+        "picked",
+        "transit",
+        "delivery",
+        "delivered"
+    );
+
+    switch(select.value){
+
+        case "Shipment Created":
+            select.classList.add("created");
+            break;
+
+        case "Picked Up":
+            select.classList.add("picked");
+            break;
+
+        case "In Transit":
+            select.classList.add("transit");
+            break;
+
+        case "Out For Delivery":
+            select.classList.add("delivery");
+            break;
+
+        case "Delivered":
+            select.classList.add("delivered");
+            break;
+
+    }
+
 }
