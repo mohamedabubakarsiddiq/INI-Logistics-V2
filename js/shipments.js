@@ -19,6 +19,32 @@ if(!table) return;
 
 table.innerHTML = "";
 
+if(shipments.length === 0){
+
+table.innerHTML = `
+<tr>
+<td colspan="12">
+
+<div class="empty-state">
+
+📦
+
+<h3>No Shipments Found</h3>
+
+<p>
+Create your first shipment.
+</p>
+
+</div>
+
+</td>
+</tr>
+`;
+
+return;
+
+}
+
 shipments.forEach(
 (shipment,index)=>{
 
@@ -47,48 +73,6 @@ badgeClass = "delivered";
 break;
 
 }
-
-if(shipments.length === 0){
-
-table.innerHTML = `
-<tr>
-<td colspan="12">
-
-<div class="empty-state">
-
-📦
-
-<h3>No Shipments Found</h3>
-
-<p>
-Create your first shipment.
-</p>
-
-</div>
-
-</td>
-</tr>
-`;
-
-}
-
-<div class="quick-actions">
-
-<a href="shipment.html"
-class="action-card">
-
-➕ Create Shipment
-
-</a>
-
-<a href="tracking.html"
-class="action-card">
-
-🚚 Track Shipment
-
-</a>
-
-</div>
 
 table.innerHTML += `
 
@@ -354,7 +338,7 @@ ${shipment.status}\n`;
     link.click();
 
 }
-function exportToCSV(){
+function exportToExcel(){
 
 let shipments =
 JSON.parse(
