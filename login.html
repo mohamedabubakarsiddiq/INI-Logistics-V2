@@ -6,22 +6,32 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+      content="width=device-width, initial-scale=1.0">
 
 <title>Login | INI Logistics</title>
 
 <link rel="stylesheet"
-href="css/style.css">
+      href="css/style.css">
+
+<link rel="preconnect"
+      href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet">
 
 <link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 </head>
 
-<body>
+<body class="login-body">
 
-<!-- ==========================
-        NAVIGATION
+<!-- =========================
+        NAVBAR
 ========================== -->
 
 <nav class="navbar">
@@ -29,7 +39,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 <div class="logo">
 
 <img src="images/logo.png"
-alt="INI Logistics">
+     alt="INI Logistics">
 
 </div>
 
@@ -63,39 +73,47 @@ FAQ
 
 </nav>
 
-<!-- ==========================
+<!-- =========================
         LOGIN SECTION
 ========================== -->
 
-<section class="login-page">
+<section class="login-section">
 
-<div class="login-container">
+<div class="login-wrapper">
+
+<!-- LEFT PANEL -->
 
 <div class="login-left">
 
-<img
-src="images/logo.png"
-class="login-logo"
-alt="INI Logistics">
+<img src="images/logo.png"
+     class="login-logo"
+     alt="INI Logistics">
 
 <h1>
 
-Welcome Back
+INI Logistics
 
 </h1>
 
+<h2>
+
+Shipment Management System
+
+</h2>
+
 <p>
 
-Sign in to access the INI Logistics
-Shipment Management System.
+Manage shipments, monitor deliveries,
+track logistics operations and generate
+reports from one centralized dashboard.
 
 </p>
 
-<div class="login-features">
+<div class="feature-list">
 
-<div class="feature">
+<div class="feature-item">
 
-<i class="fa-solid fa-truck-fast"></i>
+<i class="fas fa-truck-fast"></i>
 
 <span>
 
@@ -105,9 +123,9 @@ Real-Time Shipment Tracking
 
 </div>
 
-<div class="feature">
+<div class="feature-item">
 
-<i class="fa-solid fa-box"></i>
+<i class="fas fa-box"></i>
 
 <span>
 
@@ -117,21 +135,21 @@ Shipment Management
 
 </div>
 
-<div class="feature">
+<div class="feature-item">
 
-<i class="fa-solid fa-chart-column"></i>
+<i class="fas fa-chart-line"></i>
 
 <span>
 
-Analytics & Reports
+Business Analytics
 
 </span>
 
 </div>
 
-<div class="feature">
+<div class="feature-item">
 
-<i class="fa-solid fa-users"></i>
+<i class="fas fa-users"></i>
 
 <span>
 
@@ -145,28 +163,30 @@ Customer Management
 
 </div>
 
-<!-- ==========================
-        LOGIN CARD
-========================== -->
+<!-- RIGHT PANEL -->
 
 <div class="login-card">
 
+<div class="login-header">
+
 <h2>
 
-Administrator Login
+Welcome Back
 
 </h2>
 
 <p>
 
-Please sign in to continue.
+Please login to continue
 
 </p>
+
+</div>
 
 <form
 id="loginForm">
 
-<div class="form-group">
+<div class="input-group">
 
 <label>
 
@@ -174,16 +194,21 @@ Username
 
 </label>
 
+<div class="input-box">
+
+<i class="fas fa-user"></i>
+
 <input
 type="text"
 id="username"
-placeholder="Enter username"
-autocomplete="username"
+placeholder="Enter Username"
 required>
 
 </div>
 
-<div class="form-group">
+</div>
+
+<div class="input-group">
 
 <label>
 
@@ -191,23 +216,25 @@ Password
 
 </label>
 
-<div class="password-box">
+<div class="input-box">
+
+<i class="fas fa-lock"></i>
 
 <input
 type="password"
 id="password"
-placeholder="Enter password"
-autocomplete="current-password"
+placeholder="Enter Password"
 required>
 
 <button
 type="button"
-class="toggle-password"
+class="eye-btn"
 onclick="togglePassword()">
 
 <i
 id="eyeIcon"
-class="fa-solid fa-eye">
+class="fas fa-eye">
+
 </i>
 
 </button>
@@ -216,7 +243,7 @@ class="fa-solid fa-eye">
 
 </div>
 
-<!-- ==========================
+<!-- =========================
         LOGIN OPTIONS
 ========================== -->
 
@@ -238,8 +265,8 @@ Remember Me
 
 <a
 href="#"
-class="forgot-link"
-onclick="forgotPassword()">
+onclick="forgotPassword(); return false;"
+class="forgot-link">
 
 Forgot Password?
 
@@ -247,26 +274,26 @@ Forgot Password?
 
 </div>
 
-<!-- ==========================
+<!-- =========================
         ERROR MESSAGE
 ========================== -->
 
-<p
+<div
 id="errorMessage"
 class="error-message">
 
-</p>
+</div>
 
-<!-- ==========================
+<!-- =========================
         LOGIN BUTTON
 ========================== -->
 
 <button
 type="submit"
 id="loginBtn"
-class="login-btn">
+class="login-button">
 
-<i class="fa-solid fa-right-to-bracket"></i>
+<i class="fas fa-right-to-bracket"></i>
 
 <span>
 
@@ -276,11 +303,11 @@ Login
 
 </button>
 
-<!-- ==========================
+<!-- =========================
         DEMO CREDENTIALS
 ========================== -->
 
-<div class="demo-card">
+<div class="demo-box">
 
 <h4>
 
@@ -290,25 +317,19 @@ Demo Credentials
 
 <p>
 
-<b>Username:</b> admin
+<strong>Username:</strong>
+
+admin
 
 </p>
 
 <p>
 
-<b>Password:</b> admin123
+<strong>Password:</strong>
+
+admin123
 
 </p>
-
-</div>
-
-<div class="back-home">
-
-<a href="index.html">
-
-← Back to Home
-
-</a>
 
 </div>
 
@@ -320,7 +341,7 @@ Demo Credentials
 
 </section>
 
-<!-- ==========================
+<!-- =========================
         LOADER
 ========================== -->
 
@@ -330,13 +351,13 @@ class="loader">
 
 </div>
 
-<!-- ==========================
+<!-- =========================
         TOAST
 ========================== -->
 
 <div id="toast"></div>
 
-<!-- ==========================
+<!-- =========================
         FOOTER
 ========================== -->
 
@@ -354,7 +375,7 @@ INI Logistics
 
 <p>
 
-Reliable • Secure • Fast
+Delivering Excellence Worldwide
 
 </p>
 
@@ -386,7 +407,7 @@ Quick Links
 
 <h4>
 
-Support
+Contact
 
 </h4>
 
@@ -414,24 +435,21 @@ support@inilogistics.com
 
 </footer>
 
-<!-- ==========================
+<!-- =========================
         JAVASCRIPT
 ========================== -->
 
 <script src="js/main.js"></script>
+
 <script src="js/login.js"></script>
 
 <script>
 
-if(localStorage.getItem("loggedIn")==="true"){
-
-    window.location.href="dashboard.html";
-
-}
+checkExistingLogin();
 
 </script>
 
 </body>
 
 </html>
-    
+        
