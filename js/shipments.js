@@ -116,6 +116,8 @@ table.innerHTML += `
 </select>
 </td>
 
+<td>${createProgressBar(shipment.status)}</td>
+
 <td>
 
 <button
@@ -454,5 +456,48 @@ function setStatusColor(select){
             break;
 
     }
+
+}
+function createProgressBar(status){
+
+let step = 1;
+
+switch(status){
+
+case "Shipment Created":
+step = 1;
+break;
+
+case "Picked Up":
+step = 2;
+break;
+
+case "In Transit":
+step = 3;
+break;
+
+case "Out For Delivery":
+step = 4;
+break;
+
+case "Delivered":
+step = 5;
+break;
+
+}
+
+let html = '<div class="progress-container">';
+
+for(let i=1;i<=5;i++){
+
+html += `
+<div class="progress-step ${i<=step ? "active" : ""}"></div>
+`;
+
+}
+
+html += "</div>";
+
+return html;
 
 }
