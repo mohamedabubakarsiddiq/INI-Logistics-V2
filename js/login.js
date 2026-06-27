@@ -85,35 +85,37 @@ function loginUser(event){
 
         hideLoader();
 
-        if(
-            username==="admin" &&
-            password==="admin123"
-        ){
+      const success = login(username, password);
 
-            localStorage.setItem(
-                "loggedIn",
-                "true"
-            );
+if (success) {
 
-            localStorage.setItem(
-                "loggedUser",
-                username
-            );
+    if (remember) {
 
-            if(remember){
+        localStorage.setItem(
+            "rememberedUser",
+            username
+        );
 
-                localStorage.setItem(
-                    "rememberedUser",
-                    username
-                );
+    } else {
 
-            }else{
+        localStorage.removeItem(
+            "rememberedUser"
+        );
 
-                localStorage.removeItem(
-                    "rememberedUser"
-                );
+    }
 
-            }
+    return;
+
+}
+
+loginBtn.disabled = false;
+
+loginBtn.innerHTML = `
+<i class="fas fa-right-to-bracket"></i>
+<span>Login</span>
+`;
+
+error.innerHTML = "Invalid username or password.";
 
             showToast(
                 "Login Successful!",
