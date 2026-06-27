@@ -403,4 +403,209 @@ function updateLocation(status) {
     }
 
 }
+/*====================================================
+    TRACKING HISTORY
+====================================================*/
 
+function generateHistory(shipment) {
+
+    const history =
+    document.getElementById("trackingHistory");
+
+    history.innerHTML = "";
+
+    const steps = [
+
+        {
+            status: "Shipment Created",
+            icon: "fa-file-circle-plus",
+            message: "Shipment has been created."
+        },
+
+        {
+            status: "Picked Up",
+            icon: "fa-box",
+            message: "Shipment picked up from sender."
+        },
+
+        {
+            status: "In Transit",
+            icon: "fa-truck-fast",
+            message: "Shipment is moving to destination."
+        },
+
+        {
+            status: "Out For Delivery",
+            icon: "fa-map-location-dot",
+            message: "Courier is out for delivery."
+        },
+
+        {
+            status: "Delivered",
+            icon: "fa-circle-check",
+            message: "Shipment delivered successfully."
+        }
+
+    ];
+
+    let completed = 1;
+
+    switch (shipment.status) {
+
+        case "Shipment Created":
+            completed = 1;
+            break;
+
+        case "Picked Up":
+            completed = 2;
+            break;
+
+        case "In Transit":
+            completed = 3;
+            break;
+
+        case "Out For Delivery":
+            completed = 4;
+            break;
+
+        case "Delivered":
+            completed = 5;
+            break;
+
+    }
+
+    steps.forEach((step, index) => {
+
+        history.innerHTML += `
+
+        <div class="history-item ${index < completed ? "completed" : ""}">
+
+            <div class="history-icon">
+
+                <i class="fas ${step.icon}"></i>
+
+            </div>
+
+            <div class="history-content">
+
+                <h4>${step.status}</h4>
+
+                <p>${step.message}</p>
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+/*====================================================
+    CLEAR TRACKING
+====================================================*/
+
+function clearTracking() {
+
+    document.getElementById("trackingId").value = "";
+
+    document.getElementById("trackingResult").style.display = "none";
+
+    document.getElementById("noTrackingFound").style.display = "none";
+
+    document.getElementById("trackingId").focus();
+
+}
+
+/*====================================================
+    AUTO REFRESH
+====================================================*/
+
+let currentTrackingId = "";
+
+const originalTrackShipment = trackShipment;
+
+trackShipment = function () {
+
+    currentTrackingId = document
+        .getElementById("trackingId")
+        .value
+        .trim()
+        .toUpperCase();
+
+    originalTrackShipment();
+
+};
+
+setInterval(() => {
+
+    if (currentTrackingId !== "") {
+
+        const shipments =
+            JSON.parse(
+                localStorage.getItem("shipments")
+            ) || [];
+
+        const shipment =
+            shipments.find(s =>
+                s.id.toUpperCase() === currentTrackingId
+            );
+
+        if (shipment) {
+
+            populateShipment(shipment);
+
+        }
+
+    }
+
+}, 5000);
+
+/*====================================================
+    SEARCH SHORTCUT
+====================================================*/
+
+document.addEventListener("keydown", function (e) {
+
+    if (e.key === "Escape") {
+
+        clearTracking();
+
+    }
+
+});
+
+/*====================================================
+    DEMO TRACKING
+====================================================*/
+
+function loadLatestShipment() {
+
+    const shipments =
+    JSON.parse(localStorage.getItem("shipments")) || [];
+
+    if (shipments.length > 0) {
+
+        document.getElementById("trackingId").value =
+            shipments[shipments.length - 1].id;
+
+    }
+
+}
+
+/*====================================================
+    PAGE READY
+====================================================*/
+
+window.addEventListener("load", () => {
+
+    loadLatestShipment();
+
+});
+
+/*====================================================
+    VERSION
+====================================================*/
+
+console.log("INI Logistics Tracking Module v3.0 Loaded");
