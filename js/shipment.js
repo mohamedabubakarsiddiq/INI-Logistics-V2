@@ -1,191 +1,231 @@
-/*====================================================
+/*=========================================================
     INI Logistics
-    shipment.js - Part 1
-====================================================*/
+    New Shipment Module
+    Version 2.1.0
+=========================================================*/
 
-/*=========================================
-    Initialize Form
-=========================================*/
+"use strict";
 
-function initializeShipmentForm(){
+/*=========================================================
+    GLOBAL VARIABLES
+=========================================================*/
 
-    generateNewShipmentID();
+let shipmentForm = null;
 
-    setBookingDate();
+let shipmentId = null;
 
-    calculateETA();
+let sender = null;
 
-    calculateShippingCost();
+let receiver = null;
 
-    restoreDraft();
+let origin = null;
 
-    document
-    .getElementById("weight")
-    .addEventListener("input", calculateShippingCost);
+let destination = null;
 
-    document
-    .getElementById("priority")
-    .addEventListener("change", calculateShippingCost);
+let packageType = null;
 
-    document
-    .getElementById("shipmentForm")
-    .addEventListener("submit", saveShipment);
+let weight = null;
+
+let priority = null;
+
+let shipmentCost = null;
+
+let estimatedDelivery = null;
+
+let submitButton = null;
+
+/*=========================================================
+    CACHE DOM ELEMENTS
+=========================================================*/
+
+function cacheElements(){
+
+    shipmentForm =
+    document.getElementById("shipmentForm");
+
+    shipmentId =
+    document.getElementById("shipmentId");
+
+    sender =
+    document.getElementById("sender");
+
+    receiver =
+    document.getElementById("receiver");
+
+    origin =
+    document.getElementById("origin");
+
+    destination =
+    document.getElementById("destination");
+
+    packageType =
+    document.getElementById("packageType");
+
+    weight =
+    document.getElementById("weight");
+
+    priority =
+    document.getElementById("priority");
+
+    shipmentCost =
+    document.getElementById("cost");
+
+    estimatedDelivery =
+    document.getElementById("estimatedDelivery");
+
+    submitButton =
+    document.getElementById("saveShipment");
 
 }
 
-/*=========================================
-    Shipment ID
-=========================================*/
+/*=========================================================
+    INITIALIZE FORM
+=========================================================*/
 
-function generateNewShipmentID(){
+function initializeForm(){
 
-    document.getElementById("shipmentId").value =
+    shipmentId.value =
     generateShipmentID();
 
-}
+    shipmentCost.value =
+    formatCurrency(0);
 
-/*=========================================
-    Booking Date
-=========================================*/
-
-function setBookingDate(){
-
-    const today =
-    new Date().toISOString().split("T")[0];
-
-    document.getElementById("bookingDate").value =
-    today;
+    estimatedDelivery.value =
+    calculateDeliveryDate("Standard");
 
 }
 
-/*=========================================
-    ETA Calculation
-=========================================*/
+/*=========================================================
+    LIVE CALCULATIONS
+=========================================================*/
 
-function calculateETA(){
+function updateShipmentDetails(){
 
-    const booking =
-    document.getElementById("bookingDate").value;
+    const cost =
+    calculateShippingCost(
 
-    if(!booking) return;
+        weight.value,
 
-    const priority =
-    document.getElementById("priority").value;
+        priority.value
 
-    const eta =
-    new Date(booking);
+    );
 
-    switch(priority){
+    shipmentCost.value =
+    formatCurrency(cost);
 
-        case "Urgent":
-            eta.setDate(eta.getDate()+1);
-            break;
+    estimatedDelivery.value =
+    calculateDeliveryDate(
 
-        case "Express":
-            eta.setDate(eta.getDate()+3);
-            break;
+        priority.value
 
-        default:
-            eta.setDate(eta.getDate()+7);
+    );
+
+}
+
+/*=========================================================
+    EVENT LISTENERS
+=========================================================*/
+
+function registerEvents(){
+
+    weight.addEventListener(
+
+        "input",
+
+        updateShipmentDetails
+
+    );
+
+    priority.addEventListener(
+
+        "change",
+
+        updateShipmentDetails
+
+    );
+
+    shipmentForm.addEventListener(
+
+        "submit",
+
+        saveShipment
+
+    );
+
+}
+
+/*=========================================================
+    FORM VALIDATION
+=========================================================*/
+
+function validateShipmentForm() {
+
+    if (isEmpty(sender.value)) {
+
+        showToast("Sender name is required.", "warning");
+        sender.focus();
+        return false;
 
     }
 
-    document.getElementById("estimatedDelivery").value =
-    eta.toISOString().split("T")[0];
+    if (isEmpty(receiver.value)) {
 
-}
-
-document
-.getElementById("priority")
-.addEventListener("change",()=>{
-
-    calculateETA();
-
-    calculateShippingCost();
-
-});
-
-/*=========================================
-    Shipping Cost
-=========================================*/
-
-function calculateShippingCost(){
-
-    const weight =
-    Number(
-        document.getElementById("weight").value
-    ) || 0;
-
-    const priority =
-    document.getElementById("priority").value;
-
-    let cost =
-    weight * 50;
-
-    switch(priority){
-
-        case "Express":
-
-            cost += 300;
-
-            break;
-
-        case "Urgent":
-
-            cost += 600;
-
-            break;
-
-        default:
-
-            cost += 100;
+        showToast("Receiver name is required.", "warning");
+        receiver.focus();
+        return false;
 
     }
 
-    document.getElementById("cost").value =
-    cost;
+    if (isEmpty(origin.value)) {
 
-}
+        showToast("Origin is required.", "warning");
+        origin.focus();
+        return false;
 
-/*=========================================
-    Validation
-=========================================*/
+    }
 
-function validateShipment(){
+    if (isEmpty(destination.value)) {
 
-    if(!validateRequiredFields("shipmentForm")){
+        showToast("Destination is required.", "warning");
+        destination.focus();
+        return false;
+
+    }
+
+    if (origin.value.trim().toLowerCase() ===
+        destination.value.trim().toLowerCase()) {
+
+        showToast(
+            "Origin and Destination cannot be the same.",
+            "warning"
+        );
+
+        destination.focus();
 
         return false;
 
     }
 
-    const senderPhone =
-    document.getElementById("senderPhone").value;
+    if (packageType.value === "") {
 
-    const receiverPhone =
-    document.getElementById("receiverPhone").value;
-
-    const phonePattern =
-    /^[6-9]\d{9}$/;
-
-    if(!phonePattern.test(senderPhone)){
-
-        showToast(
-            "Invalid sender phone number.",
-            "warning"
-        );
-
+        showToast("Please select a package type.", "warning");
+        packageType.focus();
         return false;
 
     }
 
-    if(!phonePattern.test(receiverPhone)){
+    if (!isNumber(weight.value) || Number(weight.value) <= 0) {
 
-        showToast(
-            "Invalid receiver phone number.",
-            "warning"
-        );
+        showToast("Please enter a valid weight.", "warning");
+        weight.focus();
+        return false;
 
+    }
+
+    if (priority.value === "") {
+
+        showToast("Please select a priority.", "warning");
+        priority.focus();
         return false;
 
     }
@@ -194,105 +234,114 @@ function validateShipment(){
 
 }
 
-/*====================================================
-    shipment.js - Part 2
-====================================================*/
+/*=========================================================
+    CREATE SHIPMENT OBJECT
+=========================================================*/
 
-/*=========================================
-    Save Shipment
-=========================================*/
+function buildShipment() {
 
-function saveShipment(event){
+    return {
 
-    event.preventDefault();
+        id: shipmentId.value,
 
-    if(!validateShipment()){
+        sender: capitalize(
+            sanitize(sender.value)
+        ),
 
-        return;
+        receiver: capitalize(
+            sanitize(receiver.value)
+        ),
 
-    }
+        origin: capitalize(
+            sanitize(origin.value)
+        ),
 
-    let shipments =
-    getShipments();
+        destination: capitalize(
+            sanitize(destination.value)
+        ),
 
-    const shipment = {
+        packageType: packageType.value,
 
-        id:
-        document.getElementById("shipmentId").value,
+        weight: Number(weight.value),
 
-        date:
-        document.getElementById("bookingDate").value,
+        priority: priority.value,
 
-        sender:
-        document.getElementById("sender").value.trim(),
+        cost: calculateShippingCost(
 
-        senderPhone:
-        document.getElementById("senderPhone").value.trim(),
+            weight.value,
 
-        senderAddress:
-        document.getElementById("senderAddress").value.trim(),
+            priority.value
 
-        receiver:
-        document.getElementById("receiver").value.trim(),
-
-        receiverPhone:
-        document.getElementById("receiverPhone").value.trim(),
-
-        receiverAddress:
-        document.getElementById("receiverAddress").value.trim(),
-
-        origin:
-        document.getElementById("origin").value.trim(),
-
-        destination:
-        document.getElementById("destination").value.trim(),
-
-        packageType:
-        document.getElementById("packageType").value,
-
-        weight:
-        Number(document.getElementById("weight").value),
-
-        length:
-        Number(document.getElementById("length").value) || 0,
-
-        width:
-        Number(document.getElementById("width").value) || 0,
-
-        height:
-        Number(document.getElementById("height").value) || 0,
-
-        priority:
-        document.getElementById("priority").value,
-
-        cost:
-        Number(document.getElementById("cost").value),
+        ),
 
         estimatedDelivery:
-        document.getElementById("estimatedDelivery").value,
 
-        status:
-        document.getElementById("status").value,
+            calculateDeliveryDate(
 
-        paymentStatus:
-        document.getElementById("paymentStatus").value,
+                priority.value
 
-        remarks:
-        document.getElementById("remarks").value.trim()
+            ),
+
+        bookingDate: today(),
+
+        status: STATUS.CREATED,
+
+        trackingHistory: [
+
+            {
+
+                status: STATUS.CREATED,
+
+                date: new Date().toLocaleString(),
+
+                location: capitalize(origin.value),
+
+                remarks: "Shipment has been created."
+
+            }
+
+        ]
 
     };
 
-    const exists =
-    shipments.some(s=>s.id===shipment.id);
+}
 
-    if(exists){
+/*=========================================================
+    SAVE SHIPMENT
+=========================================================*/
+
+function saveShipment(event) {
+
+    event.preventDefault();
+
+    if (!validateShipmentForm())
+        return;
+
+    showLoader();
+
+    let shipments = getShipments();
+
+    const shipment = buildShipment();
+
+    const exists = shipments.some(item =>
+
+        item.id === shipment.id
+
+    );
+
+    if (exists) {
+
+        hideLoader();
 
         showToast(
+
             "Shipment ID already exists.",
+
             "error"
+
         );
 
-        generateNewShipmentID();
+        shipmentId.value = generateShipmentID();
 
         return;
 
@@ -302,175 +351,492 @@ function saveShipment(event){
 
     saveShipments(shipments);
 
-    localStorage.removeItem("shipmentDraft");
+    hideLoader();
 
     showToast(
-        "Shipment created successfully!"
+
+        "Shipment created successfully!",
+
+        "success"
+
     );
 
-    setTimeout(()=>{
+    setTimeout(() => {
 
-        window.location.href =
-        "shipments.html";
+        resetShipmentForm();
 
-    },1000);
+    }, 800);
 
 }
 
-/*=========================================
-    Save Draft
-=========================================*/
+/*=========================================================
+    RESET FORM
+=========================================================*/
 
-function saveDraft(){
+function resetShipmentForm() {
+
+    shipmentForm.reset();
+
+    shipmentId.value =
+        generateShipmentID();
+
+    shipmentCost.value =
+        formatCurrency(0);
+
+    estimatedDelivery.value =
+        calculateDeliveryDate("Standard");
+
+    clearDraft();
+
+    sender.focus();
+
+}
+
+/*=========================================================
+    SHIPMENT PREVIEW
+=========================================================*/
+
+function previewShipment() {
+
+    if (!validateShipmentForm())
+        return;
+
+    const shipment = buildShipment();
+
+    const message = `
+
+Shipment ID : ${shipment.id}
+
+Sender      : ${shipment.sender}
+
+Receiver    : ${shipment.receiver}
+
+Origin      : ${shipment.origin}
+
+Destination : ${shipment.destination}
+
+Package     : ${shipment.packageType}
+
+Weight      : ${shipment.weight} kg
+
+Priority    : ${shipment.priority}
+
+Cost        : ${formatCurrency(shipment.cost)}
+
+Delivery    : ${formatDate(shipment.estimatedDelivery)}
+
+Status      : ${shipment.status}
+
+`;
+
+    alert(message);
+
+}
+
+/*=========================================================
+    COPY SHIPMENT ID
+=========================================================*/
+
+function copyShipmentID() {
+
+    if (!shipmentId.value) return;
+
+    copyToClipboard(shipmentId.value);
+
+}
+
+/*=========================================================
+    PRINT RECEIPT
+=========================================================*/
+
+function printShipmentReceipt() {
+
+    if (!validateShipmentForm())
+        return;
+
+    window.print();
+
+}
+
+/*=========================================================
+    DRAFT STORAGE
+=========================================================*/
+
+const DRAFT_KEY = "shipmentDraft";
+
+/*=========================================================
+    SAVE DRAFT
+=========================================================*/
+
+function saveDraft() {
 
     const draft = {
 
-        bookingDate:
-        document.getElementById("bookingDate").value,
+        sender: sender.value,
 
-        priority:
-        document.getElementById("priority").value,
+        receiver: receiver.value,
 
-        packageType:
-        document.getElementById("packageType").value,
+        origin: origin.value,
 
-        sender:
-        document.getElementById("sender").value,
+        destination: destination.value,
 
-        senderPhone:
-        document.getElementById("senderPhone").value,
+        packageType: packageType.value,
 
-        senderAddress:
-        document.getElementById("senderAddress").value,
+        weight: weight.value,
 
-        receiver:
-        document.getElementById("receiver").value,
-
-        receiverPhone:
-        document.getElementById("receiverPhone").value,
-
-        receiverAddress:
-        document.getElementById("receiverAddress").value,
-
-        origin:
-        document.getElementById("origin").value,
-
-        destination:
-        document.getElementById("destination").value,
-
-        weight:
-        document.getElementById("weight").value,
-
-        length:
-        document.getElementById("length").value,
-
-        width:
-        document.getElementById("width").value,
-
-        height:
-        document.getElementById("height").value,
-
-        remarks:
-        document.getElementById("remarks").value
+        priority: priority.value
 
     };
 
     localStorage.setItem(
-        "shipmentDraft",
-        JSON.stringify(draft)
-    );
 
-    showToast(
-        "Draft saved successfully."
+        DRAFT_KEY,
+
+        JSON.stringify(draft)
+
     );
 
 }
 
-/*=========================================
-    Restore Draft
-=========================================*/
+/*=========================================================
+    RESTORE DRAFT
+=========================================================*/
 
-function restoreDraft(){
+function restoreDraft() {
 
-    const draft =
-    JSON.parse(
-        localStorage.getItem("shipmentDraft")
+    const draft = JSON.parse(
+
+        localStorage.getItem(DRAFT_KEY)
+
     );
 
-    if(!draft) return;
+    if (!draft)
+        return;
 
-    Object.keys(draft).forEach(key=>{
+    sender.value =
+        draft.sender || "";
 
-        const field =
-        document.getElementById(key);
+    receiver.value =
+        draft.receiver || "";
 
-        if(field){
+    origin.value =
+        draft.origin || "";
 
-            field.value = draft[key];
+    destination.value =
+        draft.destination || "";
+
+    packageType.value =
+        draft.packageType || "";
+
+    weight.value =
+        draft.weight || "";
+
+    priority.value =
+        draft.priority || "Standard";
+
+    updateShipmentDetails();
+
+}
+
+/*=========================================================
+    CLEAR DRAFT
+=========================================================*/
+
+function clearDraft() {
+
+    localStorage.removeItem(DRAFT_KEY);
+
+}
+
+/*=========================================================
+    AUTO SAVE
+=========================================================*/
+
+function enableAutoSave() {
+
+    const controls = [
+
+        sender,
+
+        receiver,
+
+        origin,
+
+        destination,
+
+        packageType,
+
+        weight,
+
+        priority
+
+    ];
+
+    controls.forEach(control => {
+
+        control.addEventListener(
+
+            "input",
+
+            debounce(saveDraft, 500)
+
+        );
+
+        control.addEventListener(
+
+            "change",
+
+            debounce(saveDraft, 500)
+
+        );
+
+    });
+
+}
+
+/*=========================================================
+    EXPORT SHIPMENT
+=========================================================*/
+
+function exportShipment() {
+
+    if (!validateShipmentForm())
+        return;
+
+    downloadJSON(
+
+        `${shipmentId.value}.json`,
+
+        buildShipment()
+
+    );
+
+    showToast(
+
+        "Shipment exported successfully.",
+
+        "success"
+
+    );
+
+}
+
+/*=========================================================
+    KEYBOARD SHORTCUTS
+=========================================================*/
+
+function registerKeyboardShortcuts() {
+
+    document.addEventListener("keydown", function (e) {
+
+        /* Ctrl + S = Save Shipment */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "s") {
+
+            e.preventDefault();
+
+            shipmentForm.requestSubmit();
+
+        }
+
+        /* Ctrl + Shift + P = Preview */
+
+        if (
+
+            e.ctrlKey &&
+
+            e.shiftKey &&
+
+            e.key.toLowerCase() === "p"
+
+        ) {
+
+            e.preventDefault();
+
+            previewShipment();
+
+        }
+
+        /* Ctrl + E = Export */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "e") {
+
+            e.preventDefault();
+
+            exportShipment();
+
+        }
+
+        /* Esc = Reset Form */
+
+        if (e.key === "Escape") {
+
+            if (
+
+                confirm(
+
+                    "Clear the shipment form?"
+
+                )
+
+            ) {
+
+                resetShipmentForm();
+
+            }
 
         }
 
     });
 
-    calculateETA();
-
-    calculateShippingCost();
-
 }
 
-/*=========================================
-    Reset Form
-=========================================*/
+/*=========================================================
+    UNSAVED CHANGES WARNING
+=========================================================*/
 
-function clearShipmentForm(){
+let formChanged = false;
 
-    if(!confirmAction(
-        "Clear the shipment form?"
-    )) return;
+function trackFormChanges() {
 
-    document
-    .getElementById("shipmentForm")
-    .reset();
+    const controls = [
 
-    generateNewShipmentID();
+        sender,
 
-    setBookingDate();
+        receiver,
 
-    calculateETA();
+        origin,
 
-    calculateShippingCost();
+        destination,
 
-    localStorage.removeItem(
-        "shipmentDraft"
+        packageType,
+
+        weight,
+
+        priority
+
+    ];
+
+    controls.forEach(control => {
+
+        control.addEventListener("input", () => {
+
+            formChanged = true;
+
+        });
+
+        control.addEventListener("change", () => {
+
+            formChanged = true;
+
+        });
+
+    });
+
+    window.addEventListener(
+
+        "beforeunload",
+
+        function (e) {
+
+            if (!formChanged)
+                return;
+
+            e.preventDefault();
+
+            e.returnValue = "";
+
+        }
+
     );
 
 }
 
-/*=========================================
-    Auto Save Draft
-=========================================*/
+/*=========================================================
+    REGISTER OPTIONAL BUTTONS
+=========================================================*/
+
+function registerActionButtons() {
+
+    const previewBtn =
+        document.getElementById("previewShipment");
+
+    const copyBtn =
+        document.getElementById("copyShipmentId");
+
+    const exportBtn =
+        document.getElementById("exportShipment");
+
+    const printBtn =
+        document.getElementById("printShipment");
+
+    if (previewBtn)
+        previewBtn.addEventListener(
+            "click",
+            previewShipment
+        );
+
+    if (copyBtn)
+        copyBtn.addEventListener(
+            "click",
+            copyShipmentID
+        );
+
+    if (exportBtn)
+        exportBtn.addEventListener(
+            "click",
+            exportShipment
+        );
+
+    if (printBtn)
+        printBtn.addEventListener(
+            "click",
+            printShipmentReceipt
+        );
+
+}
+
+/*=========================================================
+    INITIALIZATION
+=========================================================*/
+
+function initializeShipmentPage() {
+
+    checkLogin();
+
+    cacheElements();
+
+    initializeForm();
+
+    restoreDraft();
+
+    registerEvents();
+
+    registerActionButtons();
+
+    registerKeyboardShortcuts();
+
+    enableAutoSave();
+
+    trackFormChanges();
+
+    console.log(
+
+        "INI Logistics Shipment Module v2.1 Loaded"
+
+    );
+
+}
+
+/*=========================================================
+    START APPLICATION
+=========================================================*/
 
 document.addEventListener(
-"input",
 
-debounce(()=>{
+    "DOMContentLoaded",
 
-    saveDraft();
-
-},1500)
+    initializeShipmentPage
 
 );
 
-/*=========================================
-    Initialize
-=========================================*/
-
-window.addEventListener("load",()=>{
-
-    initializeShipmentForm();
-
-});
-
-/*====================================================
-    End shipment.js
-====================================================*/
