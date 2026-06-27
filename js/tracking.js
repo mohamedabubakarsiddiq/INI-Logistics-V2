@@ -1,19 +1,26 @@
-/*====================================================
-    INI Logistics
-    tracking.js
-====================================================*/
+/*=====================================================
+    INI Logistics V2
+    Shipment Tracking Module
+=====================================================*/
+
+let currentShipment = null;
+
+/*=====================================================
+    PAGE LOAD
+=====================================================*/
 
 window.addEventListener("load", () => {
 
     checkLogin();
 
-    document
-        .getElementById("trackingId")
-        .focus();
+    const trackingInput =
+        document.getElementById("trackingId");
 
-    document
-        .getElementById("trackingId")
-        .addEventListener("keypress", function (e) {
+    if (trackingInput) {
+
+        trackingInput.focus();
+
+        trackingInput.addEventListener("keypress", function (e) {
 
             if (e.key === "Enter") {
 
@@ -23,26 +30,25 @@ window.addEventListener("load", () => {
 
         });
 
+    }
+
 });
 
-/*=========================================
-    Track Shipment
-=========================================*/
+/*=====================================================
+    TRACK SHIPMENT
+=====================================================*/
 
 function trackShipment() {
 
-    const trackingId = document
-        .getElementById("trackingId")
+    const trackingId =
+        document.getElementById("trackingId")
         .value
         .trim()
         .toUpperCase();
 
     if (trackingId === "") {
 
-        showToast(
-            "Please enter Shipment ID.",
-            "warning"
-        );
+        showToast("Please enter a Shipment ID.", "warning");
 
         return;
 
@@ -61,87 +67,81 @@ function trackShipment() {
     if (!shipment) {
 
         document.getElementById(
-            "trackingResult"
+            "trackingContainer"
         ).style.display = "none";
 
         document.getElementById(
-            "noTrackingFound"
+            "trackingNotFound"
         ).style.display = "block";
 
-        showToast(
-            "Shipment not found.",
-            "error"
-        );
+        showToast("Shipment not found.", "error");
 
         return;
 
     }
 
-    document.getElementById(
-        "noTrackingFound"
-    ).style.display = "none";
+    currentShipment = shipment;
 
     document.getElementById(
-        "trackingResult"
+        "trackingContainer"
     ).style.display = "block";
+
+    document.getElementById(
+        "trackingNotFound"
+    ).style.display = "none";
 
     populateShipment(shipment);
 
 }
 
-/*=========================================
-    Populate Shipment Details
-=========================================*/
+/*=====================================================
+    POPULATE SHIPMENT
+=====================================================*/
 
 function populateShipment(shipment) {
 
-    document.getElementById(
-        "trackShipmentId"
-    ).innerText = shipment.id;
+    document.getElementById("shipmentId").innerText =
+        shipment.id;
 
-    document.getElementById(
-        "trackSender"
-    ).innerText = shipment.sender;
+    document.getElementById("senderName").innerText =
+        shipment.sender;
 
-    document.getElementById(
-        "trackReceiver"
-    ).innerText = shipment.receiver;
+    document.getElementById("receiverName").innerText =
+        shipment.receiver;
 
-    document.getElementById(
-        "trackOrigin"
-    ).innerText = shipment.origin;
+    document.getElementById("originCity").innerText =
+        shipment.origin;
 
-    document.getElementById(
-        "trackDestination"
-    ).innerText = shipment.destination;
+    document.getElementById("destinationCity").innerText =
+        shipment.destination;
 
-    document.getElementById(
-        "trackPackage"
-    ).innerText =
+    document.getElementById("packageType").innerText =
         shipment.packageType || "-";
 
-    document.getElementById(
-        "trackWeight"
-    ).innerText =
+    document.getElementById("shipmentWeight").innerText =
         shipment.weight + " KG";
 
-    document.getElementById(
-        "trackPriority"
-    ).innerText =
+    document.getElementById("shipmentPriority").innerText =
         shipment.priority || "-";
 
-    document.getElementById(
-        "trackCost"
-    ).innerText =
+    document.getElementById("shipmentCost").innerText =
         "₹" +
-        Number(
-            shipment.cost || 0
-        ).toLocaleString("en-IN");
+        Number(shipment.cost || 0)
+        .toLocaleString("en-IN");
 
-    document.getElementById(
-        "trackETA"
-    ).innerText =
-        shipment.estimatedDelivery;
+    document.getElementById("estimatedDelivery").innerText =
+        shipment.estimatedDelivery || "-";
+
+    document.getElementById("deliveryDate").innerText =
+        shipment.estimatedDelivery || "-";
+
+    document.getElementById("deliveryWeight").innerText =
+        shipment.weight + " KG";
+
+    document.getElementById("deliveryCost").innerText =
+        "₹" +
+        Number(shipment.cost || 0)
+        .toLocaleString("en-IN");
 
     updateStatusBadge(shipment.status);
 
@@ -154,14 +154,16 @@ function populateShipment(shipment) {
     generateHistory(shipment);
 
 }
-/*====================================================
+/*=====================================================
     STATUS BADGE
-====================================================*/
+=====================================================*/
 
 function updateStatusBadge(status) {
 
     const badge =
-    document.getElementById("trackingBadge");
+        document.getElementById("statusBadge");
+
+    if (!badge) return;
 
     badge.innerText = status;
 
@@ -189,28 +191,44 @@ function updateStatusBadge(status) {
             badge.classList.add("delivered");
             break;
 
+        default:
+            badge.classList.add("created");
+
     }
 
 }
 
-/*====================================================
+/*=====================================================
     DELIVERY PROGRESS
-====================================================*/
+=====================================================*/
 
 function updateProgress(status) {
 
-    const progress =
-    document.getElementById("trackingProgressFill");
+    const progressFill =
+        document.getElementById("progressFill");
 
-    const current =
-    document.getElementById("currentStatus");
+    const progressPercent =
+        document.getElementById("progressPercent");
 
-    const message =
-    document.getElementById("progressText");
+    const currentStatus =
+        document.getElementById("currentStatus");
+
+    const statusDescription =
+        document.getElementById("statusDescription");
+
+    if (
+        !progressFill ||
+        !progressPercent ||
+        !currentStatus ||
+        !statusDescription
+    ) {
+        return;
+    }
 
     let percent = 20;
 
-    let text = "";
+    let description =
+        "Shipment has been created successfully.";
 
     switch (status) {
 
@@ -218,8 +236,8 @@ function updateProgress(status) {
 
             percent = 20;
 
-            text =
-            "Shipment has been created successfully.";
+            description =
+                "Shipment has been created successfully.";
 
             break;
 
@@ -227,8 +245,8 @@ function updateProgress(status) {
 
             percent = 40;
 
-            text =
-            "Package has been collected from sender.";
+            description =
+                "Shipment has been picked up from sender.";
 
             break;
 
@@ -236,8 +254,8 @@ function updateProgress(status) {
 
             percent = 60;
 
-            text =
-            "Shipment is currently in transit.";
+            description =
+                "Shipment is currently in transit.";
 
             break;
 
@@ -245,8 +263,8 @@ function updateProgress(status) {
 
             percent = 80;
 
-            text =
-            "Courier is out for delivery.";
+            description =
+                "Shipment is out for delivery.";
 
             break;
 
@@ -254,97 +272,85 @@ function updateProgress(status) {
 
             percent = 100;
 
-            text =
-            "Shipment delivered successfully.";
+            description =
+                "Shipment delivered successfully.";
 
             break;
 
     }
 
-    progress.style.width =
-    percent + "%";
+    progressFill.style.width = percent + "%";
 
-    progress.innerText =
-    percent + "%";
+    progressPercent.innerText =
+        percent + "%";
 
-    current.innerText =
-    status;
+    currentStatus.innerText =
+        status;
 
-    message.innerText =
-    text;
+    statusDescription.innerText =
+        description;
 
 }
 
-/*====================================================
+/*=====================================================
     TIMELINE
-====================================================*/
+=====================================================*/
 
 function updateTimeline(status) {
 
     document
-    .querySelectorAll(".timeline-step")
-    .forEach(step => {
+        .querySelectorAll(".timeline-step")
+        .forEach(step => {
 
-        step.classList.remove("active");
+            step.classList.remove(
+                "active",
+                "completed"
+            );
 
-        step.classList.remove("completed");
+        });
 
-    });
-
-    let completed = 1;
+    let activeStep = 1;
 
     switch (status) {
 
         case "Shipment Created":
-
-            completed = 1;
-
+            activeStep = 1;
             break;
 
         case "Picked Up":
-
-            completed = 2;
-
+            activeStep = 2;
             break;
 
         case "In Transit":
-
-            completed = 3;
-
+            activeStep = 3;
             break;
 
         case "Out For Delivery":
-
-            completed = 4;
-
+            activeStep = 4;
             break;
 
         case "Delivered":
-
-            completed = 5;
-
+            activeStep = 5;
             break;
 
     }
 
-    for (let i = 1; i <= completed; i++) {
+    for (let i = 1; i <= activeStep; i++) {
 
         const step =
-        document.getElementById(
-            "step" + i
-        );
+            document.getElementById(
+                "step" + i
+            );
 
-        if (step) {
+        if (!step) continue;
 
-            if (i === completed) {
+        if (i === activeStep) {
 
-                step.classList.add("active");
+            step.classList.add("active");
 
-            } else {
+        } else {
 
-                step.classList.add("completed");
-
-            }
+            step.classList.add("completed");
 
         }
 
@@ -352,92 +358,101 @@ function updateTimeline(status) {
 
 }
 
-/*====================================================
+/*=====================================================
     CURRENT LOCATION
-====================================================*/
+=====================================================*/
 
 function updateLocation(status) {
 
     const location =
-    document.getElementById(
-        "currentLocation"
-    );
+        document.getElementById(
+            "currentLocation"
+        );
+
+    if (!location) return;
 
     switch (status) {
 
         case "Shipment Created":
 
             location.innerText =
-            "Warehouse";
+                "Origin Warehouse";
 
             break;
 
         case "Picked Up":
 
             location.innerText =
-            "Pickup Hub";
+                "Pickup Hub";
 
             break;
 
         case "In Transit":
 
             location.innerText =
-            "Regional Distribution Center";
+                "Regional Distribution Center";
 
             break;
 
         case "Out For Delivery":
 
             location.innerText =
-            "Local Delivery Hub";
+                "Local Delivery Hub";
 
             break;
 
         case "Delivered":
 
             location.innerText =
-            "Delivered to Receiver";
+                "Delivered to Receiver";
 
             break;
+
+        default:
+
+            location.innerText =
+                "Unknown";
 
     }
 
 }
-/*====================================================
+/*=====================================================
     TRACKING HISTORY
-====================================================*/
+=====================================================*/
 
 function generateHistory(shipment) {
 
     const history =
-    document.getElementById("trackingHistory");
+        document.getElementById("trackingHistory");
+
+    if (!history) return;
 
     history.innerHTML = "";
 
-    const steps = [
+    const events = [
 
         {
             status: "Shipment Created",
             icon: "fa-file-circle-plus",
-            message: "Shipment has been created."
+            message: "Shipment has been created successfully."
         },
 
         {
             status: "Picked Up",
             icon: "fa-box",
-            message: "Shipment picked up from sender."
+            message: "Shipment collected from sender."
         },
 
         {
             status: "In Transit",
             icon: "fa-truck-fast",
-            message: "Shipment is moving to destination."
+            message: "Shipment is moving through our logistics network."
         },
 
         {
             status: "Out For Delivery",
             icon: "fa-map-location-dot",
-            message: "Courier is out for delivery."
+            message: "Shipment is out for delivery."
         },
 
         {
@@ -448,49 +463,29 @@ function generateHistory(shipment) {
 
     ];
 
-    let completed = 1;
+    const currentIndex = events.findIndex(
+        event => event.status === shipment.status
+    );
 
-    switch (shipment.status) {
+    events.forEach((event, index) => {
 
-        case "Shipment Created":
-            completed = 1;
-            break;
-
-        case "Picked Up":
-            completed = 2;
-            break;
-
-        case "In Transit":
-            completed = 3;
-            break;
-
-        case "Out For Delivery":
-            completed = 4;
-            break;
-
-        case "Delivered":
-            completed = 5;
-            break;
-
-    }
-
-    steps.forEach((step, index) => {
+        const completed = index <= currentIndex;
 
         history.innerHTML += `
 
-        <div class="history-item ${index < completed ? "completed" : ""}">
+        <div class="history-item ${completed ? "completed" : ""}">
 
             <div class="history-icon">
 
-                <i class="fas ${step.icon}"></i>
+                <i class="fa-solid ${event.icon}"></i>
 
             </div>
 
             <div class="history-content">
 
-                <h4>${step.status}</h4>
+                <h4>${event.status}</h4>
 
-                <p>${step.message}</p>
+                <p>${event.message}</p>
 
             </div>
 
@@ -502,69 +497,68 @@ function generateHistory(shipment) {
 
 }
 
-/*====================================================
+/*=====================================================
     CLEAR TRACKING
-====================================================*/
+=====================================================*/
 
 function clearTracking() {
 
-    document.getElementById("trackingId").value = "";
+    const input =
+        document.getElementById("trackingId");
 
-    document.getElementById("trackingResult").style.display = "none";
+    if (input) {
 
-    document.getElementById("noTrackingFound").style.display = "none";
+        input.value = "";
 
-    document.getElementById("trackingId").focus();
-
-}
-
-/*====================================================
-    AUTO REFRESH
-====================================================*/
-
-let currentTrackingId = "";
-
-const originalTrackShipment = trackShipment;
-
-trackShipment = function () {
-
-    currentTrackingId = document
-        .getElementById("trackingId")
-        .value
-        .trim()
-        .toUpperCase();
-
-    originalTrackShipment();
-
-};
-
-setInterval(() => {
-
-    if (currentTrackingId !== "") {
-
-        const shipments =
-            JSON.parse(
-                localStorage.getItem("shipments")
-            ) || [];
-
-        const shipment =
-            shipments.find(s =>
-                s.id.toUpperCase() === currentTrackingId
-            );
-
-        if (shipment) {
-
-            populateShipment(shipment);
-
-        }
+        input.focus();
 
     }
 
+    const container =
+        document.getElementById("trackingContainer");
+
+    const notFound =
+        document.getElementById("trackingNotFound");
+
+    if (container)
+        container.style.display = "none";
+
+    if (notFound)
+        notFound.style.display = "none";
+
+    currentShipment = null;
+
+}
+
+/*=====================================================
+    AUTO REFRESH
+=====================================================*/
+
+setInterval(() => {
+
+    if (!currentShipment) return;
+
+    const shipments =
+        JSON.parse(
+            localStorage.getItem("shipments")
+        ) || [];
+
+    const updated =
+        shipments.find(
+            shipment => shipment.id === currentShipment.id
+        );
+
+    if (!updated) return;
+
+    currentShipment = updated;
+
+    populateShipment(updated);
+
 }, 5000);
 
-/*====================================================
-    SEARCH SHORTCUT
-====================================================*/
+/*=====================================================
+    SHORTCUT KEYS
+=====================================================*/
 
 document.addEventListener("keydown", function (e) {
 
@@ -574,38 +568,59 @@ document.addEventListener("keydown", function (e) {
 
     }
 
+    if (e.ctrlKey && e.key === "f") {
+
+        e.preventDefault();
+
+        const input =
+            document.getElementById("trackingId");
+
+        if (input)
+            input.focus();
+
+    }
+
 });
 
-/*====================================================
-    DEMO TRACKING
-====================================================*/
+/*=====================================================
+    DEMO FEATURE
+=====================================================*/
 
 function loadLatestShipment() {
 
     const shipments =
-    JSON.parse(localStorage.getItem("shipments")) || [];
+        JSON.parse(
+            localStorage.getItem("shipments")
+        ) || [];
 
-    if (shipments.length > 0) {
+    if (shipments.length === 0)
+        return;
 
-        document.getElementById("trackingId").value =
-            shipments[shipments.length - 1].id;
+    const latest =
+        shipments[shipments.length - 1];
 
-    }
+    const input =
+        document.getElementById("trackingId");
+
+    if (input)
+        input.value = latest.id;
 
 }
 
-/*====================================================
-    PAGE READY
-====================================================*/
+/*=====================================================
+    PAGE INITIALIZATION
+=====================================================*/
 
 window.addEventListener("load", () => {
 
     loadLatestShipment();
 
+    console.log(
+        "INI Logistics Tracking Module v3.0 Loaded"
+    );
+
 });
 
-/*====================================================
-    VERSION
-====================================================*/
 
-console.log("INI Logistics Tracking Module v3.0 Loaded");
+
+
