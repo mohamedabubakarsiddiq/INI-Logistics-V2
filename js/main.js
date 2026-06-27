@@ -1,42 +1,42 @@
 /*=========================================================
     INI Logistics
-    Version : 2.1.0
-    Core Application Framework
+    Core Module
+    Version 2.1.1
 =========================================================*/
 
 "use strict";
 
 /*=========================================================
-    APPLICATION CONFIGURATION
+    APPLICATION
 =========================================================*/
 
 const APP = {
 
     NAME: "INI Logistics",
 
-    VERSION: "2.1.0",
+    VERSION: "2.1.1",
 
     STORAGE: {
 
+        CURRENT_USER: "currentUser",
+
         SHIPMENTS: "shipments",
 
-        CUSTOMERS: "customers",
+        REMEMBER_USER: "rememberedUser"
 
-        USERS: "users",
+    },
 
-        CURRENT_USER: "loggedInUser"
-
-    }
+    SESSION_TIMEOUT: 60 * 60 * 1000 // 1 Hour
 
 };
 
 /*=========================================================
-    SHIPMENT STATUS CONSTANTS
+    STATUS CONSTANTS
 =========================================================*/
 
 const STATUS = {
 
-    CREATED: "Shipment Created",
+    CREATED: "Created",
 
     PICKED: "Picked Up",
 
@@ -49,36 +49,50 @@ const STATUS = {
 };
 
 /*=========================================================
-    STORAGE MANAGER
+    PRIORITY
 =========================================================*/
 
-function getData(key){
+const PRIORITY = {
 
-    try{
+    STANDARD: "Standard",
 
-        return JSON.parse(localStorage.getItem(key)) || [];
+    EXPRESS: "Express",
 
-    }
+    OVERNIGHT: "Overnight"
 
-    catch(error){
+};
 
-        console.error("Storage Read Error:", error);
+/*=========================================================
+    AUTHENTICATION
+=========================================================*/
 
-        return [];
+function login(username, password) {
 
-    }
+    username = username.trim();
 
-}
+    password = password.trim();
 
-function saveData(key,data){
+    if (
 
-    try{
+        username === "admin" &&
 
-        localStorage.setItem(
+        password === "admin123"
 
-            key,
+    ) {
 
-            JSON.stringify(data)
+        const user = {
+
+            username,
+
+            loginTime: Date.now()
+
+        };
+
+        sessionStorage.setItem(
+
+            APP.STORAGE.CURRENT_USER,
+
+            JSON.stringify(user)
 
         );
 
@@ -86,79 +100,7 @@ function saveData(key,data){
 
     }
 
-    catch(error){
-
-        console.error("Storage Save Error:", error);
-
-        return false;
-
-    }
-
-}
-
-/*=========================================================
-    SHIPMENTS
-=========================================================*/
-
-function getShipments(){
-
-    return getData(APP.STORAGE.SHIPMENTS);
-
-}
-
-function saveShipments(shipments){
-
-    return saveData(
-
-        APP.STORAGE.SHIPMENTS,
-
-        shipments
-
-    );
-
-}
-
-/*=========================================================
-    CUSTOMERS
-=========================================================*/
-
-function getCustomers(){
-
-    return getData(APP.STORAGE.CUSTOMERS);
-
-}
-
-function saveCustomers(customers){
-
-    return saveData(
-
-        APP.STORAGE.CUSTOMERS,
-
-        customers
-
-    );
-
-}
-
-/*=========================================================
-    USERS
-=========================================================*/
-
-function getUsers(){
-
-    return getData(APP.STORAGE.USERS);
-
-}
-
-function saveUsers(users){
-
-    return saveData(
-
-        APP.STORAGE.USERS,
-
-        users
-
-    );
+    return false;
 
 }
 
@@ -166,21 +108,141 @@ function saveUsers(users){
     CURRENT USER
 =========================================================*/
 
-function getCurrentUser(){
+function getCurrentUser() {
 
-    return JSON.parse(
+    const data = sessionStorage.getItem(
 
-        sessionStorage.getItem(
+        APP.STORAGE.CURRENT_USER
 
-            APP.STORAGE.CURRENT_USER
+    );
 
-        )
+    return data ? JSON.parse(data) : null;
+
+}
+
+/*=========================================================
+    LOGIN STATUS
+=========================================================*/
+
+function isLoggedIn() {
+
+    const user = getCurrentUser();
+
+    if (!user)
+        return false;
+
+    const expired =
+
+        Date.now() - user.loginTime >
+
+        APP.SESSION_TIMEOUT;
+
+    if (expired) {
+
+        logout(false);
+
+        return false;
+
+    }
+
+    return true;
+
+}
+
+/*=========================================================
+    PAGE PROTECTION
+=========================================================*/
+
+function checkLogin() {
+
+    if (!isLoggedIn()) {
+
+        window.location.replace(
+
+            "login.html"
+
+        );
+
+        return false;
+
+    }
+
+    return true;
+
+}
+
+/*=========================================================
+    LOGOUT
+=========================================================*/
+
+function logout(showMessage = true) {
+
+    sessionStorage.removeItem(
+
+        APP.STORAGE.CURRENT_USER
+
+    );
+
+    if (showMessage) {
+
+        localStorage.removeItem(
+
+            APP.STORAGE.REMEMBER_USER
+
+        );
+
+    }
+
+    window.location.replace(
+
+        "login.html"
 
     );
 
 }
 
-function setCurrentUser(user){
+/*=========================================================
+    STORAGE
+=========================================================*/
+
+function getShipments() {
+
+    return JSON.parse(
+
+        localStorage.getItem(
+
+            APP.STORAGE.SHIPMENTS
+
+        ) || "[]"
+
+    );
+
+}
+
+function saveShipments(shipments) {
+
+    localStorage.setItem(
+
+        APP.STORAGE.SHIPMENTS,
+
+        JSON.stringify(shipments)
+
+    );
+
+}
+
+/*=========================================================
+    SESSION REFRESH
+=========================================================*/
+
+function refreshSession() {
+
+    const user = getCurrentUser();
+
+    if (!user)
+        return;
+
+    user.loginTime = Date.now();
 
     sessionStorage.setItem(
 
@@ -192,251 +254,55 @@ function setCurrentUser(user){
 
 }
 
-function clearCurrentUser(){
+/*=========================================================
+    SESSION EVENTS
+=========================================================*/
 
-    sessionStorage.removeItem(
+["click","keydown","mousemove"]
 
-        APP.STORAGE.CURRENT_USER
+.forEach(eventName => {
+
+    document.addEventListener(
+
+        eventName,
+
+        debounce(refreshSession,1000)
 
     );
 
-}
-
-function isLoggedIn(){
-
-    return getCurrentUser() !== null;
-
-}
+});
 
 /*=========================================================
-    DEFAULT ADMIN
+    BACK BUTTON PROTECTION
 =========================================================*/
 
-function initializeUsers(){
+window.addEventListener(
 
-    let users = getUsers();
+    "pageshow",
 
-    if(users.length > 0) return;
+    function(){
 
-    users.push({
+        if(
 
-        id:1,
+            !window.location.pathname
 
-        name:"Administrator",
+            .includes("login.html")
 
-        username:"admin",
+        ){
 
-        password:"admin123",
+            checkLogin();
 
-        role:"Administrator"
-
-    });
-
-    saveUsers(users);
-
-}
-
-/*=========================================================
-    LOGIN
-=========================================================*/
-
-function login(username,password){
-
-    const users = getUsers();
-
-    const user = users.find(u =>
-
-        u.username === username &&
-
-        u.password === password
-
-    );
-
-    if(!user){
-
-        showToast(
-
-            "Invalid username or password",
-
-            "error"
-
-        );
-
-        return false;
+        }
 
     }
-
-    setCurrentUser(user);
-
-    showToast(
-
-        "Welcome " + user.name,
-
-        "success"
-
-    );
-
-    setTimeout(()=>{
-
-        window.location.href="dashboard.html";
-
-    },700);
-
-    return true;
-
-}
-
-/*=========================================================
-    LOGOUT
-=========================================================*/
-
-function logout(){
-
-    if(!confirm(
-
-        "Are you sure you want to logout?"
-
-    )) return;
-
-    clearCurrentUser();
-
-    window.location.href="login.html";
-
-}
-
-/*=========================================================
-    LOGIN CHECK
-=========================================================*/
-
-function checkLogin(){
-
-    const page =
-
-        window.location.pathname
-
-        .split("/")
-
-        .pop()
-
-        .toLowerCase();
-
-    const publicPages = [
-
-        "",
-
-        "index.html",
-
-        "login.html"
-
-    ];
-
-    if(
-
-        !isLoggedIn()
-
-        &&
-
-        !publicPages.includes(page)
-
-    ){
-
-        window.location.href="index.html";
-
-        return;
-
-    }
-
-    if(
-
-        isLoggedIn()
-
-        &&
-
-        publicPages.includes(page)
-
-    ){
-
-        window.location.href="dashboard.html";
-
-    }
-
-}
-
-/*=========================================================
-    APP STARTUP
-=========================================================*/
-
-initializeUsers();
-
-console.log(
-
-    APP.NAME +
-
-    " Version " +
-
-    APP.VERSION +
-
-    " Loaded"
 
 );
 
-/*=========================================================
-    TOAST NOTIFICATION
-=========================================================*/
+console.log(
 
-function showToast(message, type = "success") {
+`${APP.NAME} Version ${APP.VERSION}`
 
-    let toast = document.getElementById("toast");
-
-    if (!toast) {
-
-        toast = document.createElement("div");
-        toast.id = "toast";
-        document.body.appendChild(toast);
-
-    }
-
-    toast.className = "";
-
-    toast.classList.add("toast");
-    toast.classList.add(type);
-
-    let icon = "✅";
-
-    switch (type) {
-
-        case "success":
-            icon = "✅";
-            break;
-
-        case "error":
-            icon = "❌";
-            break;
-
-        case "warning":
-            icon = "⚠️";
-            break;
-
-        case "info":
-            icon = "ℹ️";
-            break;
-
-    }
-
-    toast.innerHTML = `
-        <span>${icon}</span>
-        <span>${message}</span>
-    `;
-
-    toast.classList.add("show");
-
-    setTimeout(() => {
-
-        toast.classList.remove("show");
-
-    }, 3000);
-
-}
+);
 
 /*=========================================================
     LOADER
@@ -446,8 +312,11 @@ function showLoader() {
 
     const loader = document.getElementById("loader");
 
-    if (loader)
+    if (loader) {
+
         loader.style.display = "flex";
+
+    }
 
 }
 
@@ -455,60 +324,236 @@ function hideLoader() {
 
     const loader = document.getElementById("loader");
 
-    if (loader)
+    if (loader) {
+
         loader.style.display = "none";
 
+    }
+
 }
 
 /*=========================================================
-    VALIDATION
+    TOAST NOTIFICATION
 =========================================================*/
 
-function isEmpty(value) {
+function showToast(message, type = "info", duration = 3000) {
 
-    return value.trim() === "";
+    let container = document.getElementById("toastContainer");
 
-}
+    if (!container) {
 
-function isEmail(email) {
+        container = document.createElement("div");
 
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        container.id = "toastContainer";
 
-}
+        container.className = "toast-container";
 
-function isPhone(phone) {
+        document.body.appendChild(container);
 
-    return /^[6-9]\d{9}$/.test(phone);
+    }
 
-}
+    const toast = document.createElement("div");
 
-function isNumber(value) {
+    toast.className = `toast toast-${type}`;
 
-    return !isNaN(value);
+    const icons = {
 
-}
+        success: "✔",
 
-function capitalize(text) {
+        error: "✖",
 
-    if (!text) return "";
+        warning: "⚠",
 
-    return text
-        .toLowerCase()
-        .replace(/\b\w/g, letter => letter.toUpperCase());
+        info: "ℹ"
 
-}
+    };
 
-function sanitize(value) {
+    toast.innerHTML = `
 
-    return value
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .trim();
+<div class="toast-content">
+
+<span class="toast-icon">
+
+${icons[type] || icons.info}
+
+</span>
+
+<span>${message}</span>
+
+</div>
+
+`;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+
+        toast.classList.add("show");
+
+    });
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+        setTimeout(() => {
+
+            toast.remove();
+
+        }, 300);
+
+    }, duration);
 
 }
 
 /*=========================================================
-    DATE HELPERS
+    CONFIRM DIALOG
+=========================================================*/
+
+function confirmAction(message) {
+
+    return window.confirm(message);
+
+}
+
+/*=========================================================
+    ALERT
+=========================================================*/
+
+function alertMessage(message) {
+
+    window.alert(message);
+
+}
+
+/*=========================================================
+    DOM HELPERS
+=========================================================*/
+
+function $(id) {
+
+    return document.getElementById(id);
+
+}
+
+function $all(selector) {
+
+    return document.querySelectorAll(selector);
+
+}
+
+/*=========================================================
+    ENABLE / DISABLE
+=========================================================*/
+
+function enableElement(element) {
+
+    if (element) {
+
+        element.disabled = false;
+
+    }
+
+}
+
+function disableElement(element) {
+
+    if (element) {
+
+        element.disabled = true;
+
+    }
+
+}
+
+/*=========================================================
+    SHOW / HIDE
+=========================================================*/
+
+function showElement(element) {
+
+    if (element) {
+
+        element.style.display = "";
+
+    }
+
+}
+
+function hideElement(element) {
+
+    if (element) {
+
+        element.style.display = "none";
+
+    }
+
+}
+
+/*=========================================================
+    LOADING BUTTON
+=========================================================*/
+
+function setButtonLoading(button, loading, text = "Loading...") {
+
+    if (!button) return;
+
+    if (loading) {
+
+        button.dataset.originalText = button.innerHTML;
+
+        button.disabled = true;
+
+        button.innerHTML = `
+
+<span class="spinner"></span>
+
+${text}
+
+`;
+
+    } else {
+
+        button.disabled = false;
+
+        button.innerHTML =
+
+            button.dataset.originalText ||
+
+            button.innerHTML;
+
+    }
+
+}
+
+/*=========================================================
+    PAGE TITLE
+=========================================================*/
+
+function setPageTitle(title) {
+
+    document.title =
+
+        `${title} | ${APP.NAME}`;
+
+}
+
+/*=========================================================
+    VERSION
+=========================================================*/
+
+function showVersion() {
+
+    console.log(
+
+        `${APP.NAME} v${APP.VERSION}`
+
+    );
+
+}
+
+/*=========================================================
+    DATE & TIME UTILITIES
 =========================================================*/
 
 function today() {
@@ -519,13 +564,35 @@ function today() {
 
 function formatDate(date) {
 
-    return new Date(date).toLocaleDateString("en-IN", {
+    if (!date) return "-";
 
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
+    return new Date(date).toLocaleDateString(
 
-    });
+        "en-IN",
+
+        {
+
+            day: "2-digit",
+
+            month: "short",
+
+            year: "numeric"
+
+        }
+
+    );
+
+}
+
+function formatDateTime(date) {
+
+    if (!date) return "-";
+
+    return new Date(date).toLocaleString(
+
+        "en-IN"
+
+    );
 
 }
 
@@ -535,327 +602,69 @@ function formatDate(date) {
 
 function formatCurrency(amount) {
 
-    return "₹" +
+    amount = Number(amount) || 0;
 
-        Number(amount || 0)
+    return amount.toLocaleString(
+
+        "en-IN",
+
+        {
+
+            style: "currency",
+
+            currency: "INR"
+
+        }
+
+    );
+
+}
+
+/*=========================================================
+    NUMBER FORMAT
+=========================================================*/
+
+function formatNumber(number) {
+
+    return Number(number || 0)
 
         .toLocaleString("en-IN");
 
 }
 
 /*=========================================================
-    SHIPMENT ID
+    TEXT HELPERS
 =========================================================*/
 
-function generateShipmentID() {
+function capitalize(text = "") {
 
-    const shipments = getShipments();
+    return text
 
-    if (shipments.length === 0)
-        return "SHP100001";
+        .trim()
 
-    const ids = shipments.map(shipment =>
+        .toLowerCase()
 
-        parseInt(
+        .replace(/\b\w/g,
 
-            shipment.id.replace("SHP", "")
+            char => char.toUpperCase()
 
-        )
-
-    );
-
-    const next = Math.max(...ids) + 1;
-
-    return "SHP" + next;
-
-}
-
-/*=========================================================
-    SHIPPING COST
-=========================================================*/
-
-function calculateShippingCost(weight, priority) {
-
-    weight = Number(weight);
-
-    if (isNaN(weight))
-        weight = 0;
-
-    let cost = weight * 80;
-
-    switch (priority) {
-
-        case "Express":
-
-            cost += 500;
-            break;
-
-        case "Urgent":
-
-            cost += 1000;
-            break;
-
-        case "Standard":
-
-        default:
-
-            cost += 200;
-            break;
-
-    }
-
-    return cost;
-
-}
-
-/*=========================================================
-    DELIVERY DATE
-=========================================================*/
-
-function calculateDeliveryDate(priority) {
-
-    const date = new Date();
-
-    switch (priority) {
-
-        case "Urgent":
-
-            date.setDate(date.getDate() + 1);
-            break;
-
-        case "Express":
-
-            date.setDate(date.getDate() + 3);
-            break;
-
-        default:
-
-            date.setDate(date.getDate() + 7);
-
-    }
-
-    return date.toISOString().split("T")[0];
-
-}
-
-/*=========================================================
-    STATUS HELPERS
-=========================================================*/
-
-function getStatusColor(status) {
-
-    switch (status) {
-
-        case STATUS.CREATED:
-            return "created";
-
-        case STATUS.PICKED:
-            return "picked";
-
-        case STATUS.TRANSIT:
-            return "transit";
-
-        case STATUS.DELIVERY:
-            return "delivery";
-
-        case STATUS.DELIVERED:
-            return "delivered";
-
-        default:
-            return "created";
-
-    }
-
-}
-
-function getStatusDescription(status) {
-
-    switch (status) {
-
-        case STATUS.CREATED:
-            return "Shipment has been created successfully.";
-
-        case STATUS.PICKED:
-            return "Shipment has been collected from sender.";
-
-        case STATUS.TRANSIT:
-            return "Shipment is currently in transit.";
-
-        case STATUS.DELIVERY:
-            return "Shipment is out for delivery.";
-
-        case STATUS.DELIVERED:
-            return "Shipment delivered successfully.";
-
-        default:
-            return "";
-
-    }
-
-}
-
-function getProgress(status) {
-
-    switch (status) {
-
-        case STATUS.CREATED:
-            return 20;
-
-        case STATUS.PICKED:
-            return 40;
-
-        case STATUS.TRANSIT:
-            return 60;
-
-        case STATUS.DELIVERY:
-            return 80;
-
-        case STATUS.DELIVERED:
-            return 100;
-
-        default:
-            return 0;
-
-    }
-
-}
-
-/*=========================================================
-    EXPORT HELPERS
-=========================================================*/
-
-function downloadFile(filename, content, type) {
-
-    const blob = new Blob(
-        [content],
-        { type: type }
-    );
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = filename;
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-
-}
-
-function downloadCSV(filename, rows) {
-
-    if (!rows || rows.length === 0) {
-
-        showToast(
-            "No data available to export.",
-            "warning"
         );
 
-        return;
+}
 
-    }
+function sanitize(text = "") {
 
-    const headers = Object.keys(rows[0]);
+    const div = document.createElement("div");
 
-    let csv = headers.join(",") + "\n";
+    div.textContent = text;
 
-    rows.forEach(row => {
-
-        csv += headers.map(header => {
-
-            return `"${row[header] ?? ""}"`;
-
-        }).join(",");
-
-        csv += "\n";
-
-    });
-
-    downloadFile(
-
-        filename,
-
-        csv,
-
-        "text/csv"
-
-    );
+    return div.innerHTML.trim();
 
 }
 
-function downloadJSON(filename, data) {
+function escapeHTML(text = "") {
 
-    downloadFile(
-
-        filename,
-
-        JSON.stringify(data, null, 2),
-
-        "application/json"
-
-    );
-
-}
-
-/*=========================================================
-    UUID GENERATOR
-=========================================================*/
-
-function uuid() {
-
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-
-        .replace(/[xy]/g, function(c){
-
-            const r = Math.random() * 16 | 0;
-
-            const v =
-
-                c === "x"
-
-                ? r
-
-                : (r & 0x3 | 0x8);
-
-            return v.toString(16);
-
-        });
-
-}
-
-/*=========================================================
-    RANDOM NUMBER
-=========================================================*/
-
-function randomNumber(min, max){
-
-    return Math.floor(
-
-        Math.random()
-
-        * (max - min + 1)
-
-    ) + min;
-
-}
-
-/*=========================================================
-    DELAY
-=========================================================*/
-
-function delay(ms){
-
-    return new Promise(resolve => {
-
-        setTimeout(resolve, ms);
-
-    });
+    return sanitize(text);
 
 }
 
@@ -863,31 +672,31 @@ function delay(ms){
     DEBOUNCE
 =========================================================*/
 
-function debounce(func, wait = 300){
+function debounce(callback, delay = 300) {
 
-    let timeout;
+    let timer;
 
-    return function(){
+    return function (...args) {
 
-        clearTimeout(timeout);
+        clearTimeout(timer);
 
-        timeout = setTimeout(() => {
+        timer = setTimeout(() => {
 
-            func.apply(this, arguments);
+            callback.apply(this, args);
 
-        }, wait);
+        }, delay);
 
     };
 
 }
 
 /*=========================================================
-    COPY TO CLIPBOARD
+    CLIPBOARD
 =========================================================*/
 
-async function copyToClipboard(text){
+async function copyToClipboard(text) {
 
-    try{
+    try {
 
         await navigator.clipboard.writeText(text);
 
@@ -901,15 +710,13 @@ async function copyToClipboard(text){
 
     }
 
-    catch(error){
-
-        console.error(error);
+    catch {
 
         showToast(
 
-            "Copy failed",
+            "Clipboard unavailable",
 
-            "error"
+            "warning"
 
         );
 
@@ -918,18 +725,290 @@ async function copyToClipboard(text){
 }
 
 /*=========================================================
-    SCROLL TO TOP
+    RANDOM ID
 =========================================================*/
 
-function scrollTopPage(){
+function generateRandomString(length = 8) {
 
-    window.scrollTo({
+    const chars =
 
-        top:0,
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-        behavior:"smooth"
+    let result = "";
+
+    for (
+
+        let i = 0;
+
+        i < length;
+
+        i++
+
+    ) {
+
+        result += chars.charAt(
+
+            Math.floor(
+
+                Math.random() * chars.length
+
+            )
+
+        );
+
+    }
+
+    return result;
+
+}
+
+/*=========================================================
+    SHIPMENT ID
+=========================================================*/
+
+function generateShipmentID() {
+
+    const shipments = getShipments();
+
+    let max = 100000;
+
+    shipments.forEach(shipment => {
+
+        const number = parseInt(
+
+            shipment.id.replace(/\D/g, ""),
+
+            10
+
+        );
+
+        if (number > max)
+
+            max = number;
 
     });
+
+    return `SHP${max + 1}`;
+
+}
+
+/*=========================================================
+    DELIVERY DATE
+=========================================================*/
+
+function calculateDeliveryDate(priority) {
+
+    const delivery = new Date();
+
+    switch (priority) {
+
+        case PRIORITY.OVERNIGHT:
+
+            delivery.setDate(
+
+                delivery.getDate() + 1
+
+            );
+
+            break;
+
+        case PRIORITY.EXPRESS:
+
+            delivery.setDate(
+
+                delivery.getDate() + 3
+
+            );
+
+            break;
+
+        default:
+
+            delivery.setDate(
+
+                delivery.getDate() + 7
+
+            );
+
+    }
+
+    return delivery.toISOString().split("T")[0];
+
+}
+
+/*=========================================================
+    STATUS DESCRIPTION
+=========================================================*/
+
+function getStatusDescription(status) {
+
+    switch (status) {
+
+        case STATUS.CREATED:
+
+            return "Shipment created.";
+
+        case STATUS.PICKED:
+
+            return "Shipment picked up.";
+
+        case STATUS.TRANSIT:
+
+            return "Shipment is in transit.";
+
+        case STATUS.DELIVERY:
+
+            return "Out for delivery.";
+
+        case STATUS.DELIVERED:
+
+            return "Shipment delivered.";
+
+        default:
+
+            return "Unknown status.";
+
+    }
+
+}
+
+/*=========================================================
+    STATUS COLOR
+=========================================================*/
+
+function getStatusColor(status) {
+
+    switch (status) {
+
+        case STATUS.CREATED:
+
+            return "primary";
+
+        case STATUS.PICKED:
+
+            return "warning";
+
+        case STATUS.TRANSIT:
+
+            return "info";
+
+        case STATUS.DELIVERY:
+
+            return "secondary";
+
+        case STATUS.DELIVERED:
+
+            return "success";
+
+        default:
+
+            return "dark";
+
+    }
+
+}
+
+/*=========================================================
+    DOWNLOAD FILE
+=========================================================*/
+
+function downloadFile(content, fileName, mimeType) {
+
+    const blob = new Blob(
+
+        [content],
+
+        { type: mimeType }
+
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.download = fileName;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+}
+
+/*=========================================================
+    EXPORT JSON
+=========================================================*/
+
+function downloadJSON(fileName, data) {
+
+    downloadFile(
+
+        JSON.stringify(data, null, 2),
+
+        fileName,
+
+        "application/json"
+
+    );
+
+}
+
+/*=========================================================
+    EXPORT CSV
+=========================================================*/
+
+function downloadCSV(fileName, data) {
+
+    if (!Array.isArray(data) || data.length === 0) {
+
+        showToast(
+
+            "No data available to export.",
+
+            "warning"
+
+        );
+
+        return;
+
+    }
+
+    const headers = Object.keys(data[0]);
+
+    const rows = data.map(row =>
+
+        headers.map(header => {
+
+            const value = row[header] ?? "";
+
+            return `"${String(value).replace(/"/g, '""')}"`;
+
+        }).join(",")
+
+    );
+
+    const csv = [
+
+        headers.join(","),
+
+        ...rows
+
+    ].join("\n");
+
+    downloadFile(
+
+        csv,
+
+        fileName,
+
+        "text/csv;charset=utf-8"
+
+    );
 
 }
 
@@ -937,51 +1016,153 @@ function scrollTopPage(){
     PRINT PAGE
 =========================================================*/
 
-function printPage(){
+function printPage() {
 
     window.print();
 
 }
 
 /*=========================================================
-    PAGE TITLE
+    SEARCH
 =========================================================*/
 
-function setPageTitle(title){
+function searchByKeyword(data, keyword, fields) {
 
-    document.title =
+    if (!keyword)
 
-        title +
+        return [...data];
 
-        " | " +
+    keyword = keyword.toLowerCase();
 
-        APP.NAME;
+    return data.filter(item =>
+
+        fields.some(field =>
+
+            String(item[field] || "")
+
+                .toLowerCase()
+
+                .includes(keyword)
+
+        )
+
+    );
 
 }
 
 /*=========================================================
-    FOOTER YEAR
+    SORT
 =========================================================*/
 
-function updateCopyrightYear(){
+function sortData(data, field, ascending = true) {
 
-    const year =
+    return [...data].sort((a, b) => {
 
-        document.getElementById(
+        let valueA = a[field];
 
-            "currentYear"
+        let valueB = b[field];
 
-        );
+        if (typeof valueA === "string") {
 
-    if(year){
+            valueA = valueA.toLowerCase();
 
-        year.textContent =
+            valueB = valueB.toLowerCase();
 
-            new Date()
+        }
 
-            .getFullYear();
+        if (valueA < valueB)
 
-    }
+            return ascending ? -1 : 1;
+
+        if (valueA > valueB)
+
+            return ascending ? 1 : -1;
+
+        return 0;
+
+    });
+
+}
+
+/*=========================================================
+    FILTER
+=========================================================*/
+
+function filterData(data, predicate) {
+
+    return data.filter(predicate);
+
+}
+
+/*=========================================================
+    TOTAL REVENUE
+=========================================================*/
+
+function calculateTotalRevenue(shipments) {
+
+    return shipments.reduce(
+
+        (total, shipment) =>
+
+            total + Number(shipment.cost || 0),
+
+        0
+
+    );
+
+}
+
+/*=========================================================
+    SHIPMENT COUNT
+=========================================================*/
+
+function countShipmentsByStatus(shipments, status) {
+
+    return shipments.filter(
+
+        shipment => shipment.status === status
+
+    ).length;
+
+}
+
+/*=========================================================
+    UNIQUE VALUES
+=========================================================*/
+
+function uniqueValues(data, field) {
+
+    return [
+
+        ...new Set(
+
+            data.map(item => item[field])
+
+        )
+
+    ].sort();
+
+}
+
+/*=========================================================
+    RELOAD DATA
+=========================================================*/
+
+function reloadShipments() {
+
+    return getShipments();
+
+}
+
+/*=========================================================
+    SAVE DATA
+=========================================================*/
+
+function updateShipmentList(shipments) {
+
+    saveShipments(shipments);
+
+    return getShipments();
 
 }
 
@@ -989,41 +1170,89 @@ function updateCopyrightYear(){
     GLOBAL ERROR HANDLER
 =========================================================*/
 
-window.onerror = function(message, source, line, column, error){
+let hasShownCriticalError = false;
 
-    console.error("Application Error");
+window.addEventListener("error", function (event) {
 
-    console.error({
+    console.error(event);
 
-        message,
+    if (!hasShownCriticalError) {
 
-        source,
+        hasShownCriticalError = true;
 
-        line,
+        showToast(
+            "Unexpected application error.",
+            "error"
+        );
 
-        column,
+    }
 
-        error
+});
+/*=========================================================
+    UNHANDLED PROMISE REJECTIONS
+=========================================================*/
 
-    });
+window.addEventListener(
 
-    showToast(
+    "unhandledrejection",
 
-        "An unexpected error occurred.",
+    function (event) {
 
-        "error"
+        console.error(
 
-    );
+            "Unhandled Promise:",
 
-    return false;
+            event.reason
 
-};
+        );
+
+        showToast(
+
+            "Unexpected application error.",
+
+            "error"
+
+        );
+
+    }
+
+);
+
+/*=========================================================
+    SESSION EXPIRATION CHECK
+=========================================================*/
+
+function monitorSession() {
+
+    setInterval(function () {
+
+        if (!isLoggedIn()) {
+
+            showToast(
+
+                "Session expired. Please login again.",
+
+                "warning"
+
+            );
+
+            setTimeout(function () {
+
+                logout(false);
+
+            }, 1000);
+
+        }
+
+    }, 60000);
+
+}
 
 /*=========================================================
     ONLINE / OFFLINE STATUS
 =========================================================*/
 
-window.addEventListener("online", () => {
+window.addEventListener("online", function () {
 
     showToast(
 
@@ -1035,7 +1264,7 @@ window.addEventListener("online", () => {
 
 });
 
-window.addEventListener("offline", () => {
+window.addEventListener("offline", function () {
 
     showToast(
 
@@ -1048,157 +1277,364 @@ window.addEventListener("offline", () => {
 });
 
 /*=========================================================
-    GLOBAL KEYBOARD SHORTCUTS
+    PERFORMANCE TIMER
 =========================================================*/
 
-document.addEventListener("keydown", function(e){
+const appStartTime = performance.now();
 
-    /* ESC = Close loader */
+window.addEventListener(
 
-    if(e.key === "Escape"){
+    "load",
 
-        hideLoader();
+    function () {
 
-    }
+        const loadTime =
 
-    /* Ctrl + P */
+            performance.now() -
 
-    if(e.ctrlKey && e.key.toLowerCase() === "p"){
+            appStartTime;
 
-        e.preventDefault();
+        console.log(
 
-        printPage();
+            `Application loaded in ${loadTime.toFixed(2)} ms`
 
-    }
-
-    /* Ctrl + Home */
-
-    if(e.ctrlKey && e.key === "Home"){
-
-        e.preventDefault();
-
-        scrollTopPage();
+        );
 
     }
 
-});
+);
 
 /*=========================================================
-    VERIFY STORAGE
+    STORAGE CHECK
 =========================================================*/
 
-function verifyStorage(){
+function checkStorageSupport() {
 
-    if(!localStorage.getItem(APP.STORAGE.SHIPMENTS)){
+    try {
 
-        saveShipments([]);
+        localStorage.setItem(
+
+            "__storage_test__",
+
+            "1"
+
+        );
+
+        localStorage.removeItem(
+
+            "__storage_test__"
+
+        );
+
+        return true;
 
     }
 
-    if(!localStorage.getItem(APP.STORAGE.CUSTOMERS)){
+    catch {
 
-        saveCustomers([]);
+        showToast(
 
-    }
+            "Browser storage unavailable.",
 
-    if(!localStorage.getItem(APP.STORAGE.USERS)){
+            "error"
 
-        initializeUsers();
+        );
+
+        return false;
 
     }
 
 }
 
 /*=========================================================
-    APP INITIALIZATION
+    APPLICATION HEALTH
 =========================================================*/
 
-function initApp(){
+function checkApplicationHealth() {
 
-    console.group(APP.NAME);
+    const shipmentCount =
 
-    console.log("Version :", APP.VERSION);
+        getShipments().length;
 
-    console.log("Initializing application...");
+    const user = getCurrentUser();
 
-    verifyStorage();
+    console.group(
 
-    checkLogin();
+        `${APP.NAME} Health Check`
 
-    updateCopyrightYear();
+    );
 
-    hideLoader();
+    console.log(
 
-    console.log("Initialization completed.");
+        "Version:",
+
+        APP.VERSION
+
+    );
+
+    console.log(
+
+        "Current User:",
+
+        user ? user.username : "None"
+
+    );
+
+    console.log(
+
+        "Shipments:",
+
+        shipmentCount
+
+    );
+
+    console.log(
+
+        "Storage:",
+
+        checkStorageSupport()
+
+            ? "Available"
+
+            : "Unavailable"
+
+    );
 
     console.groupEnd();
 
 }
 
 /*=========================================================
-    DOM READY
+    MEMORY CLEANUP
 =========================================================*/
 
-document.addEventListener("DOMContentLoaded", function(){
+function cleanupApplication() {
 
-    initApp();
+    console.log(
 
-});
+        "Cleaning temporary resources..."
+
+    );
+
+}
 
 /*=========================================================
-    GLOBAL HELPERS
+    BEFORE PAGE UNLOAD
+=========================================================*/
+
+window.addEventListener(
+
+    "beforeunload",
+
+    cleanupApplication
+
+);
+
+/*=========================================================
+    LOG APPLICATION INFO
+=========================================================*/
+
+function logApplicationInfo() {
+
+    console.log(
+
+        `${APP.NAME} v${APP.VERSION}`
+
+    );
+
+    console.log(
+
+        "Session Active:",
+
+        isLoggedIn()
+
+    );
+
+    console.log(
+
+        "Current User:",
+
+        getCurrentUser()
+
+    );
+
+}
+
+/*=========================================================
+    APPLICATION INITIALIZATION
+=========================================================*/
+
+function initializeApplication() {
+
+    console.group(`${APP.NAME} Initialization`);
+
+    logApplicationInfo();
+
+    checkStorageSupport();
+
+    checkApplicationHealth();
+
+    monitorSession();
+
+    hideLoader();
+
+    console.log("Application initialized successfully.");
+
+    console.groupEnd();
+
+}
+
+/*=========================================================
+    GLOBAL FUNCTIONS
 =========================================================*/
 
 window.APP = APP;
+
 window.STATUS = STATUS;
 
-window.getShipments = getShipments;
-window.saveShipments = saveShipments;
-
-window.getCustomers = getCustomers;
-window.saveCustomers = saveCustomers;
-
-window.getUsers = getUsers;
-window.saveUsers = saveUsers;
+window.PRIORITY = PRIORITY;
 
 window.login = login;
+
 window.logout = logout;
+
 window.checkLogin = checkLogin;
+
+window.isLoggedIn = isLoggedIn;
+
+window.getCurrentUser = getCurrentUser;
+
+window.getShipments = getShipments;
+
+window.saveShipments = saveShipments;
+
+window.generateShipmentID = generateShipmentID;
+
+window.calculateDeliveryDate = calculateDeliveryDate;
+
+window.getStatusDescription = getStatusDescription;
+
+window.getStatusColor = getStatusColor;
 
 window.showToast = showToast;
 
 window.showLoader = showLoader;
+
 window.hideLoader = hideLoader;
 
-window.generateShipmentID = generateShipmentID;
-window.calculateShippingCost = calculateShippingCost;
-window.calculateDeliveryDate = calculateDeliveryDate;
-
-window.formatCurrency = formatCurrency;
-window.formatDate = formatDate;
-
-window.getStatusColor = getStatusColor;
-window.getStatusDescription = getStatusDescription;
-window.getProgress = getProgress;
-
 window.downloadCSV = downloadCSV;
+
 window.downloadJSON = downloadJSON;
+
+window.printPage = printPage;
 
 window.copyToClipboard = copyToClipboard;
 
-window.randomNumber = randomNumber;
-window.uuid = uuid;
-window.delay = delay;
+window.formatDate = formatDate;
+
+window.formatDateTime = formatDateTime;
+
+window.formatCurrency = formatCurrency;
+
+window.formatNumber = formatNumber;
+
+window.capitalize = capitalize;
+
+window.sanitize = sanitize;
+
 window.debounce = debounce;
 
-window.scrollTopPage = scrollTopPage;
-window.printPage = printPage;
+window.today = today;
+
+window.reloadShipments = reloadShipments;
+
+window.updateShipmentList = updateShipmentList;
+
+window.searchByKeyword = searchByKeyword;
+
+window.sortData = sortData;
+
+window.filterData = filterData;
+
+window.calculateTotalRevenue = calculateTotalRevenue;
+
+window.countShipmentsByStatus = countShipmentsByStatus;
+
+window.uniqueValues = uniqueValues;
 
 /*=========================================================
-    APPLICATION READY
+    DOM READY
+=========================================================*/
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    initializeApplication();
+
+});
+
+/*=========================================================
+    APP READY
+=========================================================*/
+
+window.addEventListener("load", () => {
+
+    console.log(
+
+        `${APP.NAME} ${APP.VERSION} Ready`
+
+    );
+
+});
+
+/*=========================================================
+    DEBUG
+=========================================================*/
+
+window.appInfo = function () {
+
+    console.table({
+
+        Name: APP.NAME,
+
+        Version: APP.VERSION,
+
+        User: getCurrentUser()?.username || "Guest",
+
+        LoggedIn: isLoggedIn(),
+
+        Shipments: getShipments().length
+
+    });
+
+};
+
+/*=========================================================
+    END OF FILE
 =========================================================*/
 
 console.log(
-    `${APP.NAME} v${APP.VERSION} Ready`
+
+    "==================================="
+
 );
+
+console.log(
+
+    `${APP.NAME} Core Loaded`
+
+);
+
+console.log(
+
+    `Version : ${APP.VERSION}`
+
+);
+
+console.log(
+
+    "==================================="
+
+);
+
+
 
