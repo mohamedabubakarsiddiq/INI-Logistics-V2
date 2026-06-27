@@ -243,12 +243,11 @@ function loadRememberedUser(){
     Already Logged In
 =========================================*/
 
-function checkExistingLogin(){
+function checkExistingLogin() {
 
-    if(localStorage.getItem("loggedIn")==="true"){
+    if (isLoggedIn()) {
 
-        window.location.href=
-        "dashboard.html";
+        window.location.href = "dashboard.html";
 
     }
 
