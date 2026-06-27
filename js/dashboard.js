@@ -1,740 +1,828 @@
-/*====================================================
-    INI Logistics Dashboard
-    dashboard.js - Part 1
-====================================================*/
+/*=========================================================
+    INI Logistics
+    Dashboard Module
+    Version 2.1.0
+=========================================================*/
 
+"use strict";
+
+/*=========================================================
+    GLOBAL VARIABLES
+=========================================================*/
+
+let shipments = [];
+
+let statusChart = null;
+let monthlyChart = null;
 let revenueChart = null;
-let shipmentChart = null;
 
-/*=========================================
-    Dashboard Loader
-=========================================*/
+/*=========================================================
+    DASHBOARD ELEMENTS
+=========================================================*/
+
+let totalShipmentsCard;
+let deliveredCard;
+let transitCard;
+let pendingCard;
+let revenueCard;
+let todayCard;
+
+let recentShipmentTable;
+
+/*=========================================================
+    CACHE DOM ELEMENTS
+=========================================================*/
+
+function cacheElements(){
+
+    totalShipmentsCard =
+    document.getElementById("totalShipments");
+
+    deliveredCard =
+    document.getElementById("deliveredShipments");
+
+    transitCard =
+    document.getElementById("transitShipments");
+
+    pendingCard =
+    document.getElementById("pendingShipments");
+
+    revenueCard =
+    document.getElementById("totalRevenue");
+
+    todayCard =
+    document.getElementById("todayShipments");
+
+    recentShipmentTable =
+    document.getElementById("recentShipmentTable");
+
+}
+
+/*=========================================================
+    LOAD DATA
+=========================================================*/
 
 function loadDashboard(){
 
-    try{
+    shipments = getShipments();
 
-        const shipments =
-        JSON.parse(localStorage.getItem("shipments")) || [];
+    updateDashboardCards();
+	
+    refreshCharts();
 
-        const customers =
-        JSON.parse(localStorage.getItem("customers")) || [];
-
-        updateDashboardCards(shipments, customers);
-
-        loadRecentShipments(shipments);
-
-        loadRecentActivity(shipments);
-
-        createRevenueChart(shipments);
-
-        createShipmentChart(shipments);
-
-        updateCurrentDate();
-
-        updateLastUpdated();
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-        showToast("Unable to load dashboard.");
-
-    }
+    renderRecentShipments();
 
 }
 
-/*=========================================
-    Dashboard Cards
-=========================================*/
+/*=========================================================
+    KPI CARDS
+=========================================================*/
 
-function updateDashboardCards(shipments, customers){
+function updateDashboardCards(){
 
-    const total =
-    shipments.length;
+    const total = shipments.length;
 
-    const delivered =
-    shipments.filter(s=>s.status==="Delivered").length;
+    const delivered = shipments.filter(
 
-    const transit =
-    shipments.filter(s=>s.status==="In Transit").length;
+        shipment =>
 
-    const pending =
-    shipments.filter(s=>
-        s.status==="Shipment Created" ||
-        s.status==="Picked Up" ||
-        s.status==="Out For Delivery"
+        shipment.status === STATUS.DELIVERED
+
     ).length;
 
-    const today =
-    getTodayShipments(shipments);
+    const transit = shipments.filter(
 
-    const revenue =
-    calculateRevenue(shipments);
+        shipment =>
 
-    const rate =
-    total===0
-    ?0
-    :Math.round((delivered/total)*100);
+        shipment.status === STATUS.TRANSIT
 
-    animateCounter(
-        "totalShipments",
-        total
+    ).length;
+
+    const pending = shipments.filter(
+
+        shipment =>
+
+        shipment.status !== STATUS.DELIVERED
+
+    ).length;
+
+    const revenue = shipments.reduce(
+
+        (sum, shipment) =>
+
+        sum + Number(shipment.cost),
+
+        0
+
     );
 
-    animateCounter(
-        "deliveredShipments",
-        delivered
-    );
+    const today = shipments.filter(
 
-    animateCounter(
-        "transitShipments",
-        transit
-    );
+        shipment =>
 
-    animateCounter(
-        "pendingShipments",
-        pending
-    );
+        shipment.bookingDate === today()
 
-    animateCounter(
-        "todayShipments",
-        today
-    );
+    ).length;
 
-    animateCounter(
-        "totalCustomers",
-        customers.length
-    );
+    if(totalShipmentsCard)
 
-    document.getElementById(
-        "deliveryRate"
-    ).innerText = rate + "%";
+        totalShipmentsCard.textContent = total;
 
-    document.getElementById(
-        "totalRevenue"
-    ).innerText =
-    "₹" + revenue.toLocaleString("en-IN");
+    if(deliveredCard)
 
-}
+        deliveredCard.textContent = delivered;
 
-/*=========================================
-    Revenue
-=========================================*/
+    if(transitCard)
 
-function calculateRevenue(shipments){
+        transitCard.textContent = transit;
 
-    return shipments.reduce((sum, shipment)=>{
+    if(pendingCard)
 
-        return sum +
-        Number(shipment.cost || 0);
+        pendingCard.textContent = pending;
 
-    },0);
+    if(revenueCard)
+
+        revenueCard.textContent =
+
+        formatCurrency(revenue);
+
+    if(todayCard)
+
+        todayCard.textContent = today;
 
 }
 
-/*=========================================
-    Today's Shipments
-=========================================*/
+/*=========================================================
+    RECENT SHIPMENTS
+=========================================================*/
 
-function getTodayShipments(shipments){
+function renderRecentShipments(){
 
-    const today =
-    new Date().toISOString().split("T")[0];
-
-    return shipments.filter(shipment=>{
-
-        return shipment.date === today;
-
-    }).length;
-
-}
-
-/*=========================================
-    Counter Animation
-=========================================*/
-
-function animateCounter(id, value){
-
-    const element =
-    document.getElementById(id);
-
-    if(!element) return;
-
-    let current = 0;
-
-    const increment =
-    Math.max(1, Math.ceil(value/40));
-
-    const timer =
-    setInterval(()=>{
-
-        current += increment;
-
-        if(current >= value){
-
-            current = value;
-
-            clearInterval(timer);
-
-        }
-
-        element.innerText =
-        current.toLocaleString("en-IN");
-
-    },20);
-
-}
-
-/*=========================================
-    Date
-=========================================*/
-
-function updateCurrentDate(){
-
-    const element =
-    document.getElementById("currentDate");
-
-    if(!element) return;
-
-    element.innerText =
-    new Date().toLocaleDateString(
-        "en-IN",
-        {
-            weekday:"long",
-            day:"numeric",
-            month:"long",
-            year:"numeric"
-        }
-    );
-
-}
-
-/*=========================================
-    Last Updated
-=========================================*/
-
-function updateLastUpdated(){
-
-    const element =
-    document.getElementById("lastUpdated");
-
-    if(!element) return;
-
-    element.innerText =
-    "Last Updated : " +
-    new Date().toLocaleTimeString();
-
-}
-/*====================================================
-    Charts
-====================================================*/
-
-/*=========================================
-    Monthly Revenue Chart
-=========================================*/
-
-function createRevenueChart(shipments){
-
-    const ctx =
-    document.getElementById("revenueChart");
-
-    if(!ctx) return;
-
-    const monthlyRevenue =
-    new Array(12).fill(0);
-
-    shipments.forEach(shipment=>{
-
-        const amount =
-        Number(shipment.cost || 0);
-
-        let month =
-        new Date().getMonth();
-
-        if(shipment.date){
-
-            const d =
-            new Date(shipment.date);
-
-            if(!isNaN(d)){
-                month = d.getMonth();
-            }
-
-        }
-
-        monthlyRevenue[month] += amount;
-
-    });
-
-    if(revenueChart){
-
-        revenueChart.destroy();
-
-    }
-
-    revenueChart =
-    new Chart(ctx,{
-
-        type:"bar",
-
-        data:{
-
-            labels:[
-                "Jan","Feb","Mar","Apr","May","Jun",
-                "Jul","Aug","Sep","Oct","Nov","Dec"
-            ],
-
-            datasets:[{
-
-                label:"Revenue",
-
-                data:monthlyRevenue,
-
-                borderWidth:1,
-
-                borderRadius:8,
-
-                backgroundColor:[
-                    "#0d6efd","#0d6efd","#0d6efd",
-                    "#0d6efd","#0d6efd","#0d6efd",
-                    "#198754","#198754","#198754",
-                    "#198754","#198754","#198754"
-                ]
-
-            }]
-
-        },
-
-        options:{
-
-            responsive:true,
-
-            maintainAspectRatio:false,
-
-            plugins:{
-
-                legend:{
-                    display:false
-                }
-
-            },
-
-            scales:{
-
-                y:{
-                    beginAtZero:true
-                }
-
-            }
-
-        }
-
-    });
-
-}
-
-/*=========================================
-    Shipment Status Chart
-=========================================*/
-
-function createShipmentChart(shipments){
-
-    const ctx =
-    document.getElementById("shipmentChart");
-
-    if(!ctx) return;
-
-    const created =
-    shipments.filter(s=>s.status==="Shipment Created").length;
-
-    const picked =
-    shipments.filter(s=>s.status==="Picked Up").length;
-
-    const transit =
-    shipments.filter(s=>s.status==="In Transit").length;
-
-    const delivery =
-    shipments.filter(s=>s.status==="Out For Delivery").length;
-
-    const delivered =
-    shipments.filter(s=>s.status==="Delivered").length;
-
-    if(shipmentChart){
-
-        shipmentChart.destroy();
-
-    }
-
-    shipmentChart =
-    new Chart(ctx,{
-
-        type:"doughnut",
-
-        data:{
-
-            labels:[
-
-                "Created",
-                "Picked Up",
-                "In Transit",
-                "Out For Delivery",
-                "Delivered"
-
-            ],
-
-            datasets:[{
-
-                data:[
-
-                    created,
-                    picked,
-                    transit,
-                    delivery,
-                    delivered
-
-                ],
-
-                backgroundColor:[
-
-                    "#6c757d",
-                    "#17a2b8",
-                    "#0d6efd",
-                    "#fd7e14",
-                    "#198754"
-
-                ],
-
-                borderWidth:2
-
-            }]
-
-        },
-
-        options:{
-
-            responsive:true,
-
-            maintainAspectRatio:false,
-
-            plugins:{
-
-                legend:{
-                    position:"bottom"
-                }
-
-            }
-
-        }
-
-    });
-
-}
-
-/*=========================================
-    Refresh Dashboard
-=========================================*/
-
-function refreshDashboard(){
-
-    showLoader();
-
-    setTimeout(()=>{
-
-        loadDashboard();
-
-        hideLoader();
-
-        showToast(
-            "Dashboard refreshed successfully!"
-        );
-
-    },700);
-
-}
-
-/*=========================================
-    Auto Refresh
-=========================================*/
-
-setInterval(()=>{
-
-    if(document.visibilityState==="visible"){
-
-        loadDashboard();
-
-    }
-
-},60000);
-/*====================================================
-    Recent Shipments
-====================================================*/
-
-function loadRecentShipments(shipments){
-
-    const table =
-    document.getElementById("recentTable");
-
-    if(!table) return;
-
-    table.innerHTML = "";
-
-    if(shipments.length === 0){
-
-        table.innerHTML = `
-        <tr>
-            <td colspan="5">
-                No Shipments Available
-            </td>
-        </tr>
-        `;
+    if(!recentShipmentTable)
 
         return;
-    }
 
-    const recent =
-    [...shipments].reverse().slice(0,5);
-
-    recent.forEach(shipment=>{
-
-        table.innerHTML += `
-
-        <tr>
-
-            <td>${shipment.id}</td>
-
-            <td>${shipment.sender}</td>
-
-            <td>${shipment.receiver}</td>
-
-            <td>${shipment.destination}</td>
-
-            <td>
-
-                <span class="status-badge ${getStatusClass(shipment.status)}">
-
-                    ${shipment.status}
-
-                </span>
-
-            </td>
-
-        </tr>
-
-        `;
-
-    });
-
-}
-
-/*====================================================
-    Recent Activity
-====================================================*/
-
-function loadRecentActivity(shipments){
-
-    const feed =
-    document.getElementById("activityFeed");
-
-    if(!feed) return;
-
-    feed.innerHTML = "";
+    recentShipmentTable.innerHTML = "";
 
     if(shipments.length === 0){
 
-        feed.innerHTML = `
+        recentShipmentTable.innerHTML = `
 
-        <div class="activity-item">
+<tr>
 
-            <div class="activity-icon">
+<td colspan="6">
 
-                📦
+No shipment records available.
 
-            </div>
+</td>
 
-            <div>
+</tr>
 
-                <h4>
-
-                    No Recent Activity
-
-                </h4>
-
-                <p>
-
-                    Create your first shipment.
-
-                </p>
-
-            </div>
-
-        </div>
-
-        `;
+`;
 
         return;
 
     }
+
+    const latest =
 
     [...shipments]
-    .reverse()
-    .slice(0,5)
-    .forEach(shipment=>{
 
-        feed.innerHTML += `
+    .sort(
 
-        <div class="activity-item">
+        (a,b)=>
 
-            <div class="activity-icon">
+        new Date(b.bookingDate)
 
-                🚚
+        -
 
-            </div>
+        new Date(a.bookingDate)
 
-            <div>
+    )
 
-                <h4>
+    .slice(0,5);
 
-                    ${shipment.id}
+    latest.forEach(shipment=>{
 
-                </h4>
+        recentShipmentTable.innerHTML += `
 
-                <p>
+<tr>
 
-                    ${shipment.sender}
+<td>${shipment.id}</td>
 
-                    →
+<td>${shipment.sender}</td>
 
-                    ${shipment.receiver}
+<td>${shipment.destination}</td>
 
-                </p>
+<td>
 
-                <small>
+<span class="status-badge ${getStatusColor(shipment.status)}">
 
-                    ${shipment.status}
+${shipment.status}
 
-                </small>
+</span>
 
-            </div>
+</td>
 
-        </div>
+<td>${shipment.priority}</td>
 
-        `;
+<td>${formatDate(shipment.bookingDate)}</td>
+
+</tr>
+
+`;
 
     });
 
 }
 
-/*====================================================
-    Status Badge
-====================================================*/
+/*=========================================================
+    REFRESH DASHBOARD
+=========================================================*/
 
-function getStatusClass(status){
+function refreshDashboard() {
 
-    switch(status){
+    shipments = getShipments();
 
-        case "Shipment Created":
-            return "created";
+    updateDashboardCards();
 
-        case "Picked Up":
-            return "picked";
+    renderRecentShipments();
 
-        case "In Transit":
-            return "transit";
+    refreshCharts();
 
-        case "Out For Delivery":
-            return "delivery";
-
-        case "Delivered":
-            return "delivered";
-
-        default:
-            return "";
-    }
+    refreshAnalytics();
 
 }
+/*=========================================================
+    PAGE STARTUP
+=========================================================*/
 
-/*====================================================
-    Notifications
-====================================================*/
+document.addEventListener(
 
-function showNotification(){
+"DOMContentLoaded",
 
-    const shipments =
-    JSON.parse(localStorage.getItem("shipments")) || [];
+function(){
 
-    const pending =
-    shipments.filter(s=>s.status !== "Delivered").length;
+    checkLogin();
 
-    showToast(
-
-        pending===0
-
-        ?
-
-        "🎉 All shipments delivered."
-
-        :
-
-        `${pending} shipment(s) require attention.`
-
-    );
-
-}
-
-/*====================================================
-    Update Notification Count
-====================================================*/
-
-function updateNotificationCount(){
-
-    const shipments =
-    JSON.parse(localStorage.getItem("shipments")) || [];
-
-    const pending =
-    shipments.filter(
-        s=>s.status!=="Delivered"
-    ).length;
-
-    const badge =
-    document.getElementById("notifyCount");
-
-    if(badge){
-
-        badge.innerText = pending;
-
-    }
-
-}
-
-/*====================================================
-    Dashboard Initialization
-====================================================*/
-
-window.addEventListener("load",()=>{
-
-    updateNotificationCount();
+    cacheElements();
 
     loadDashboard();
 
+    console.log(
+
+        "Dashboard Module v2.1 Loaded"
+
+    );
+
 });
 
-/*====================================================
-    Dashboard Refresh Button
-====================================================*/
+/*=========================================================
+    RECENT ACTIVITY
+=========================================================*/
 
-document.addEventListener("visibilitychange",()=>{
+function renderRecentActivity() {
 
-    if(document.visibilityState==="visible"){
+    const activityTable =
+        document.getElementById("recentActivity");
 
-        loadDashboard();
+    if (!activityTable)
+        return;
+
+    activityTable.innerHTML = "";
+
+    if (shipments.length === 0) {
+
+        activityTable.innerHTML = `
+
+<tr>
+
+<td colspan="5">
+
+No recent activity available.
+
+</td>
+
+</tr>
+
+`;
+
+        return;
 
     }
 
-});
+    const latest = [...shipments]
 
-/*====================================================
-    End dashboard.js
-====================================================*/
+        .sort((a, b) =>
+
+            new Date(b.bookingDate) -
+
+            new Date(a.bookingDate)
+
+        )
+
+        .slice(0, 10);
+
+    latest.forEach(shipment => {
+
+        activityTable.innerHTML += `
+
+<tr>
+
+<td>${shipment.id}</td>
+
+<td>${shipment.sender}</td>
+
+<td>${shipment.destination}</td>
+
+<td>
+
+<span class="status-badge ${getStatusColor(shipment.status)}">
+
+${shipment.status}
+
+</span>
+
+</td>
+
+<td>${formatDate(shipment.bookingDate)}</td>
+
+</tr>
+
+`;
+
+    });
+
+}
+
+/*=========================================================
+    TOP ORIGINS
+=========================================================*/
+
+function getTopOrigins(limit = 5) {
+
+    const counts = {};
+
+    shipments.forEach(shipment => {
+
+        counts[shipment.origin] =
+
+            (counts[shipment.origin] || 0) + 1;
+
+    });
+
+    return Object.entries(counts)
+
+        .sort((a, b) => b[1] - a[1])
+
+        .slice(0, limit);
+
+}
+
+/*=========================================================
+    TOP DESTINATIONS
+=========================================================*/
+
+function getTopDestinations(limit = 5) {
+
+    const counts = {};
+
+    shipments.forEach(shipment => {
+
+        counts[shipment.destination] =
+
+            (counts[shipment.destination] || 0) + 1;
+
+    });
+
+    return Object.entries(counts)
+
+        .sort((a, b) => b[1] - a[1])
+
+        .slice(0, limit);
+
+}
+
+/*=========================================================
+    DISPLAY TOP LOCATIONS
+=========================================================*/
+
+function renderTopLocations() {
+
+    const originList =
+        document.getElementById("topOrigins");
+
+    const destinationList =
+        document.getElementById("topDestinations");
+
+    if (originList) {
+
+        originList.innerHTML = "";
+
+        getTopOrigins().forEach(item => {
+
+            originList.innerHTML += `
+
+<li>
+
+${item[0]}
+
+<span>${item[1]}</span>
+
+</li>
+
+`;
+
+        });
+
+    }
+
+    if (destinationList) {
+
+        destinationList.innerHTML = "";
+
+        getTopDestinations().forEach(item => {
+
+            destinationList.innerHTML += `
+
+<li>
+
+${item[0]}
+
+<span>${item[1]}</span>
+
+</li>
+
+`;
+
+        });
+
+    }
+
+}
+
+/*=========================================================
+    PRIORITY DISTRIBUTION
+=========================================================*/
+
+function renderPriorityDistribution() {
+
+    const element =
+        document.getElementById("priorityDistribution");
+
+    if (!element)
+        return;
+
+    const priorities = {
+
+        Standard: 0,
+
+        Express: 0,
+
+        Overnight: 0
+
+    };
+
+    shipments.forEach(shipment => {
+
+        if (priorities[shipment.priority] !== undefined) {
+
+            priorities[shipment.priority]++;
+
+        }
+
+    });
+
+    element.innerHTML = `
+
+<div>Standard : ${priorities.Standard}</div>
+
+<div>Express : ${priorities.Express}</div>
+
+<div>Overnight : ${priorities.Overnight}</div>
+
+`;
+
+}
+
+/*=========================================================
+    EXPORT DASHBOARD DATA
+=========================================================*/
+
+function exportDashboardData() {
+
+    const dashboardData = {
+
+        generatedAt: new Date().toISOString(),
+
+        totalShipments: shipments.length,
+
+        totalRevenue: shipments.reduce(
+
+            (sum, shipment) =>
+
+                sum + Number(shipment.cost),
+
+            0
+
+        ),
+
+        delivered:
+
+            shipments.filter(
+
+                s => s.status === STATUS.DELIVERED
+
+            ).length,
+
+        inTransit:
+
+            shipments.filter(
+
+                s => s.status === STATUS.TRANSIT
+
+            ).length,
+
+        pending:
+
+            shipments.filter(
+
+                s => s.status !== STATUS.DELIVERED
+
+            ).length,
+
+        shipments
+
+    };
+
+    downloadJSON(
+
+        "dashboard-report.json",
+
+        dashboardData
+
+    );
+
+    showToast(
+
+        "Dashboard exported successfully.",
+
+        "success"
+
+    );
+
+}
+
+/*=========================================================
+    PRINT DASHBOARD
+=========================================================*/
+
+function printDashboard() {
+
+    printPage();
+
+}
+
+/*=========================================================
+    REFRESH ANALYTICS
+=========================================================*/
+
+function refreshAnalytics() {
+
+    renderRecentActivity();
+
+    renderTopLocations();
+
+    renderPriorityDistribution();
+
+}
+/*=========================================================
+    AUTO REFRESH
+=========================================================*/
+
+let dashboardRefreshTimer = null;
+
+function startAutoRefresh() {
+
+    stopAutoRefresh();
+
+    dashboardRefreshTimer = setInterval(() => {
+
+        refreshDashboard();
+
+    }, 30000);
+
+}
+
+function stopAutoRefresh() {
+
+    if (dashboardRefreshTimer) {
+
+        clearInterval(dashboardRefreshTimer);
+
+        dashboardRefreshTimer = null;
+
+    }
+
+}
+
+/*=========================================================
+    PAGE VISIBILITY
+=========================================================*/
+
+document.addEventListener(
+
+    "visibilitychange",
+
+    function () {
+
+        if (document.hidden) {
+
+            stopAutoRefresh();
+
+        } else {
+
+            refreshDashboard();
+
+            startAutoRefresh();
+
+        }
+
+    }
+
+);
+
+/*=========================================================
+    KEYBOARD SHORTCUTS
+=========================================================*/
+
+function registerKeyboardShortcuts() {
+
+    document.addEventListener("keydown", function (e) {
+
+        /* Ctrl + R */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "r") {
+
+            e.preventDefault();
+
+            refreshDashboard();
+
+            showToast(
+
+                "Dashboard refreshed.",
+
+                "success"
+
+            );
+
+        }
+
+        /* Ctrl + E */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "e") {
+
+            e.preventDefault();
+
+            exportDashboardData();
+
+        }
+
+        /* Ctrl + P */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "p") {
+
+            e.preventDefault();
+
+            printDashboard();
+
+        }
+
+    });
+
+}
+
+/*=========================================================
+    REGISTER ACTION BUTTONS
+=========================================================*/
+
+function registerDashboardButtons() {
+
+    const refreshButton =
+        document.getElementById("refreshDashboard");
+
+    const exportButton =
+        document.getElementById("exportDashboard");
+
+    const printButton =
+        document.getElementById("printDashboard");
+
+    if (refreshButton) {
+
+        refreshButton.addEventListener(
+
+            "click",
+
+            refreshDashboard
+
+        );
+
+    }
+
+    if (exportButton) {
+
+        exportButton.addEventListener(
+
+            "click",
+
+            exportDashboardData
+
+        );
+
+    }
+
+    if (printButton) {
+
+        printButton.addEventListener(
+
+            "click",
+
+            printDashboard
+
+        );
+
+    }
+
+}
+
+/*=========================================================
+    DASHBOARD HEALTH
+=========================================================*/
+
+function checkDashboardHealth() {
+
+    if (!Array.isArray(shipments)) {
+
+        console.error(
+
+            "Shipment data unavailable."
+
+        );
+
+        return;
+
+    }
+
+    console.log(
+
+        `Dashboard Ready | ${shipments.length} Shipments Loaded`
+
+    );
+
+}
+
+/*=========================================================
+    INITIALIZATION
+=========================================================*/
+
+function initializeDashboard() {
+
+    checkLogin();
+
+    cacheElements();
+
+    loadDashboard();
+
+    refreshCharts();
+
+    refreshAnalytics();
+
+    registerDashboardButtons();
+
+    registerKeyboardShortcuts();
+
+    startAutoRefresh();
+
+    checkDashboardHealth();
+
+    console.log(
+
+        "INI Logistics Dashboard v2.1 Loaded"
+
+    );
+
+}
+
+/*=========================================================
+    APPLICATION START
+=========================================================*/
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    initializeDashboard
+
+);
+
+
