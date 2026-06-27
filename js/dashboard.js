@@ -253,29 +253,6 @@ function refreshDashboard() {
     refreshAnalytics();
 
 }
-/*=========================================================
-    PAGE STARTUP
-=========================================================*/
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-function(){
-
-    checkLogin();
-
-    cacheElements();
-
-    loadDashboard();
-
-    console.log(
-
-        "Dashboard Module v2.1 Loaded"
-
-    );
-
-});
 
 /*=========================================================
     RECENT ACTIVITY
