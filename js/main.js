@@ -1,682 +1,927 @@
-/*====================================================
+/*=========================================================
     INI Logistics
-    main.js - Part 1
-====================================================*/
+    Version : 2.1.0
+    Core Application Framework
+=========================================================*/
 
-/*=========================================
-    Session Management
-=========================================*/
+"use strict";
 
-function loginUser(event){
+/*=========================================================
+    APPLICATION CONFIGURATION
+=========================================================*/
 
-    event.preventDefault();
+const APP = {
 
-    const username =
-    document.getElementById("username").value.trim();
+    NAME: "INI Logistics",
 
-    const password =
-    document.getElementById("password").value.trim();
+    VERSION: "2.1.0",
 
-    if(username === "admin" && password === "admin123"){
+    STORAGE: {
 
-        localStorage.setItem("loggedIn","true");
+        SHIPMENTS: "shipments",
 
-        localStorage.setItem("loggedUser",username);
+        CUSTOMERS: "customers",
 
-        showToast("Login Successful");
+        USERS: "users",
 
-        setTimeout(()=>{
+        CURRENT_USER: "loggedInUser"
 
-            window.location.href="dashboard.html";
+    }
 
-        },1000);
+};
 
-    }else{
+/*=========================================================
+    SHIPMENT STATUS CONSTANTS
+=========================================================*/
 
-        showToast("Invalid Username or Password","error");
+const STATUS = {
+
+    CREATED: "Shipment Created",
+
+    PICKED: "Picked Up",
+
+    TRANSIT: "In Transit",
+
+    DELIVERY: "Out For Delivery",
+
+    DELIVERED: "Delivered"
+
+};
+
+/*=========================================================
+    STORAGE MANAGER
+=========================================================*/
+
+function getData(key){
+
+    try{
+
+        return JSON.parse(localStorage.getItem(key)) || [];
+
+    }
+
+    catch(error){
+
+        console.error("Storage Read Error:", error);
+
+        return [];
 
     }
 
 }
 
-function checkLogin(){
+function saveData(key,data){
 
-    if(localStorage.getItem("loggedIn") !== "true"){
+    try{
 
-        window.location.href = "login.html";
+        localStorage.setItem(
+
+            key,
+
+            JSON.stringify(data)
+
+        );
+
+        return true;
+
+    }
+
+    catch(error){
+
+        console.error("Storage Save Error:", error);
+
+        return false;
 
     }
 
 }
 
-function logout(){
-
-    if(!confirm("Are you sure you want to logout?")){
-
-        return;
-
-    }
-
-    localStorage.removeItem("loggedIn");
-    localStorage.removeItem("loggedUser");
-
-    window.location.href = "login.html";
-
-}
-
-function checkLogin(){
-
-    const loggedIn =
-    localStorage.getItem("loggedIn");
-
-    if(loggedIn !== "true"){
-
-        window.location.href = "index.html";
-
-    }
-
-}
-
-/*=========================================
-    Loader
-=========================================*/
-
-function showLoader(){
-
-    const loader =
-    document.getElementById("loader");
-
-    if(loader){
-
-        loader.style.display = "block";
-
-    }
-
-}
-
-function hideLoader(){
-
-    const loader =
-    document.getElementById("loader");
-
-    if(loader){
-
-        loader.style.display = "none";
-
-    }
-
-}
-
-/*=========================================
-    Toast Notification
-=========================================*/
-
-function showToast(message, type="success"){
-
-    const toast =
-    document.getElementById("toast");
-
-    if(!toast){
-
-        alert(message);
-
-        return;
-
-    }
-
-    toast.innerText = message;
-
-    toast.className = "show";
-
-    switch(type){
-
-        case "success":
-
-            toast.style.background = "#198754";
-
-            break;
-
-        case "error":
-
-            toast.style.background = "#dc3545";
-
-            break;
-
-        case "warning":
-
-            toast.style.background = "#fd7e14";
-
-            break;
-
-        default:
-
-            toast.style.background = "#0d6efd";
-
-    }
-
-    setTimeout(()=>{
-
-        toast.className = "";
-
-    },3000);
-
-}
-
-/*=========================================
-    Theme
-=========================================*/
-
-function toggleTheme(){
-
-    document.body.classList.toggle("dark-mode");
-
-    const dark =
-    document.body.classList.contains(
-        "dark-mode"
-    );
-
-    localStorage.setItem(
-        "theme",
-        dark ? "dark" : "light"
-    );
-
-}
-
-function loadTheme(){
-
-    const theme =
-    localStorage.getItem("theme");
-
-    if(theme === "dark"){
-
-        document.body.classList.add("dark-mode");
-
-    }
-
-}
-
-/*=========================================
-    Page Loading
-=========================================*/
-
-window.addEventListener("load",()=>{
-
-    loadTheme();
-
-    hideLoader();
-
-});
-
-/*=========================================
-    Common Confirmation
-=========================================*/
-
-function confirmAction(message){
-
-    return confirm(
-        message || "Are you sure?"
-    );
-
-}
-/*====================================================
-    INI Logistics
-    main.js - Part 2
-====================================================*/
-
-/*=========================================
-    Shipment Storage
-=========================================*/
+/*=========================================================
+    SHIPMENTS
+=========================================================*/
 
 function getShipments(){
 
-    return JSON.parse(
-        localStorage.getItem("shipments")
-    ) || [];
+    return getData(APP.STORAGE.SHIPMENTS);
 
 }
 
 function saveShipments(shipments){
 
-    localStorage.setItem(
-        "shipments",
-        JSON.stringify(shipments)
+    return saveData(
+
+        APP.STORAGE.SHIPMENTS,
+
+        shipments
+
     );
 
 }
 
-/*=========================================
-    Customer Storage
-=========================================*/
+/*=========================================================
+    CUSTOMERS
+=========================================================*/
 
 function getCustomers(){
 
-    return JSON.parse(
-        localStorage.getItem("customers")
-    ) || [];
+    return getData(APP.STORAGE.CUSTOMERS);
 
 }
 
 function saveCustomers(customers){
 
-    localStorage.setItem(
-        "customers",
-        JSON.stringify(customers)
+    return saveData(
+
+        APP.STORAGE.CUSTOMERS,
+
+        customers
+
     );
 
 }
 
-/*=========================================
-    Generate Shipment ID
-=========================================*/
+/*=========================================================
+    USERS
+=========================================================*/
 
-function generateShipmentID(){
+function getUsers(){
 
-    const date =
-    new Date();
-
-    const year =
-    date.getFullYear();
-
-    const random =
-    Math.floor(
-        1000 +
-        Math.random() * 9000
-    );
-
-    return `INI-${year}-${random}`;
+    return getData(APP.STORAGE.USERS);
 
 }
 
-/*=========================================
-    Currency Formatter
-=========================================*/
+function saveUsers(users){
 
-function formatCurrency(amount){
+    return saveData(
 
-    return "₹" +
-    Number(amount || 0)
-    .toLocaleString("en-IN");
+        APP.STORAGE.USERS,
 
-}
+        users
 
-/*=========================================
-    Date Formatter
-=========================================*/
-
-function formatDate(date){
-
-    if(!date) return "-";
-
-    return new Date(date)
-    .toLocaleDateString(
-        "en-IN",
-        {
-            day:"2-digit",
-            month:"short",
-            year:"numeric"
-        }
     );
 
 }
 
-/*=========================================
-    Time Formatter
-=========================================*/
+/*=========================================================
+    CURRENT USER
+=========================================================*/
 
-function formatTime(date){
+function getCurrentUser(){
 
-    return new Date(date)
-    .toLocaleTimeString(
-        "en-IN",
-        {
-            hour:"2-digit",
-            minute:"2-digit"
-        }
+    return JSON.parse(
+
+        sessionStorage.getItem(
+
+            APP.STORAGE.CURRENT_USER
+
+        )
+
     );
 
 }
 
-/*=========================================
-    Refresh Page
-=========================================*/
+function setCurrentUser(user){
 
-function refreshPage(){
+    sessionStorage.setItem(
 
-    location.reload();
+        APP.STORAGE.CURRENT_USER,
+
+        JSON.stringify(user)
+
+    );
 
 }
 
-/*=========================================
-    Reset Form
-=========================================*/
+function clearCurrentUser(){
 
-function resetForm(formId){
+    sessionStorage.removeItem(
 
-    const form =
-    document.getElementById(formId);
+        APP.STORAGE.CURRENT_USER
 
-    if(form){
+    );
 
-        form.reset();
+}
+
+function isLoggedIn(){
+
+    return getCurrentUser() !== null;
+
+}
+
+/*=========================================================
+    DEFAULT ADMIN
+=========================================================*/
+
+function initializeUsers(){
+
+    let users = getUsers();
+
+    if(users.length > 0) return;
+
+    users.push({
+
+        id:1,
+
+        name:"Administrator",
+
+        username:"admin",
+
+        password:"admin123",
+
+        role:"Administrator"
+
+    });
+
+    saveUsers(users);
+
+}
+
+/*=========================================================
+    LOGIN
+=========================================================*/
+
+function login(username,password){
+
+    const users = getUsers();
+
+    const user = users.find(u =>
+
+        u.username === username &&
+
+        u.password === password
+
+    );
+
+    if(!user){
+
+        showToast(
+
+            "Invalid username or password",
+
+            "error"
+
+        );
+
+        return false;
 
     }
 
-}
+    setCurrentUser(user);
 
-/*=========================================Required Field Validation=========================================*/
+    showToast(
 
-function validateRequiredFields(formId){
+        "Welcome " + user.name,
 
-    const form =
-    document.getElementById(formId);
+        "success"
 
-    if(!form) return true;
-
-    const fields =
-    form.querySelectorAll(
-        "[required]"
     );
 
-    for(const field of fields){
+    setTimeout(()=>{
 
-        if(field.value.trim()===""){
+        window.location.href="dashboard.html";
 
-            field.focus();
-
-            showToast(
-                `${field.name || field.id} is required`,
-                "warning"
-            );
-
-            return false;
-
-        }
-
-    }
+    },700);
 
     return true;
 
 }
 
-/*=========================================Search Helper========================================*/
+/*=========================================================
+    LOGOUT
+=========================================================*/
 
-function searchTable(inputId, tableId){
+function logout(){
 
-    const input =
-    document
-    .getElementById(inputId)
-    .value
-    .toLowerCase();
+    if(!confirm(
 
-    const rows =
-    document.querySelectorAll(
-        `#${tableId} tr`
-    );
+        "Are you sure you want to logout?"
 
-    rows.forEach(row=>{
+    )) return;
 
-        row.style.display =
-        row.innerText
+    clearCurrentUser();
+
+    window.location.href="index.html";
+
+}
+
+/*=========================================================
+    LOGIN CHECK
+=========================================================*/
+
+function checkLogin(){
+
+    const page =
+
+        window.location.pathname
+
+        .split("/")
+
+        .pop()
+
+        .toLowerCase();
+
+    const publicPages = [
+
+        "",
+
+        "index.html",
+
+        "login.html"
+
+    ];
+
+    if(
+
+        !isLoggedIn()
+
+        &&
+
+        !publicPages.includes(page)
+
+    ){
+
+        window.location.href="index.html";
+
+        return;
+
+    }
+
+    if(
+
+        isLoggedIn()
+
+        &&
+
+        publicPages.includes(page)
+
+    ){
+
+        window.location.href="dashboard.html";
+
+    }
+
+}
+
+/*=========================================================
+    APP STARTUP
+=========================================================*/
+
+initializeUsers();
+
+console.log(
+
+    APP.NAME +
+
+    " Version " +
+
+    APP.VERSION +
+
+    " Loaded"
+
+);
+
+/*=========================================================
+    TOAST NOTIFICATION
+=========================================================*/
+
+function showToast(message, type = "success") {
+
+    let toast = document.getElementById("toast");
+
+    if (!toast) {
+
+        toast = document.createElement("div");
+        toast.id = "toast";
+        document.body.appendChild(toast);
+
+    }
+
+    toast.className = "";
+
+    toast.classList.add("toast");
+    toast.classList.add(type);
+
+    let icon = "✅";
+
+    switch (type) {
+
+        case "success":
+            icon = "✅";
+            break;
+
+        case "error":
+            icon = "❌";
+            break;
+
+        case "warning":
+            icon = "⚠️";
+            break;
+
+        case "info":
+            icon = "ℹ️";
+            break;
+
+    }
+
+    toast.innerHTML = `
+        <span>${icon}</span>
+        <span>${message}</span>
+    `;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    }, 3000);
+
+}
+
+/*=========================================================
+    LOADER
+=========================================================*/
+
+function showLoader() {
+
+    const loader = document.getElementById("loader");
+
+    if (loader)
+        loader.style.display = "flex";
+
+}
+
+function hideLoader() {
+
+    const loader = document.getElementById("loader");
+
+    if (loader)
+        loader.style.display = "none";
+
+}
+
+/*=========================================================
+    VALIDATION
+=========================================================*/
+
+function isEmpty(value) {
+
+    return value.trim() === "";
+
+}
+
+function isEmail(email) {
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+}
+
+function isPhone(phone) {
+
+    return /^[6-9]\d{9}$/.test(phone);
+
+}
+
+function isNumber(value) {
+
+    return !isNaN(value);
+
+}
+
+function capitalize(text) {
+
+    if (!text) return "";
+
+    return text
         .toLowerCase()
-        .includes(input)
+        .replace(/\b\w/g, letter => letter.toUpperCase());
 
-        ?
+}
 
-        ""
+function sanitize(value) {
 
-        :
+    return value
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .trim();
 
-        "none";
+}
+
+/*=========================================================
+    DATE HELPERS
+=========================================================*/
+
+function today() {
+
+    return new Date().toISOString().split("T")[0];
+
+}
+
+function formatDate(date) {
+
+    return new Date(date).toLocaleDateString("en-IN", {
+
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
 
     });
 
 }
 
-/*========================================Debounce=========================================*/
+/*=========================================================
+    CURRENCY
+=========================================================*/
 
-function debounce(func, delay){
+function formatCurrency(amount) {
 
-    let timer;
+    return "₹" +
 
-    return function(){
+        Number(amount || 0)
 
-        clearTimeout(timer);
-
-        timer =
-        setTimeout(
-
-            ()=>func.apply(this,arguments),
-
-            delay
-
-        );
-
-    };
-
-}
-/*====================================================
-    INI Logistics
-    main.js - Part 3
-====================================================*/
-
-/*=========================================
-    Internet Status
-=========================================*/
-
-window.addEventListener("online",()=>{
-
-    showToast(
-        "Internet connection restored.",
-        "success"
-    );
-
-});
-
-window.addEventListener("offline",()=>{
-
-    showToast(
-        "You are offline.",
-        "warning"
-    );
-
-});
-
-/*=========================================
-    Browser Notification
-=========================================*/
-
-function notify(title,message){
-
-    if(!("Notification" in window)) return;
-
-    if(Notification.permission==="granted"){
-
-        new Notification(title,{
-            body:message,
-            icon:"images/logo.png"
-        });
-
-    }
-    else if(Notification.permission!=="denied"){
-
-        Notification.requestPermission();
-
-    }
+        .toLocaleString("en-IN");
 
 }
 
-/*=========================================
-    Storage Statistics
-=========================================*/
+/*=========================================================
+    SHIPMENT ID
+=========================================================*/
 
-function getStorageStatistics(){
+function generateShipmentID() {
 
     const shipments = getShipments();
 
-    const customers = getCustomers();
+    if (shipments.length === 0)
+        return "SHP100001";
 
-    return{
+    const ids = shipments.map(shipment =>
 
-        shipments:shipments.length,
+        parseInt(
 
-        customers:customers.length,
+            shipment.id.replace("SHP", "")
 
-        revenue:shipments.reduce(
-            (sum,s)=>sum+Number(s.cost||0),
-            0
         )
-
-    };
-
-}
-
-/*=========================================
-    Export Local Storage Backup
-=========================================*/
-
-function backupApplicationData(){
-
-    const backup = {
-
-        shipments:getShipments(),
-
-        customers:getCustomers(),
-
-        exportedOn:new Date().toISOString()
-
-    };
-
-    const blob = new Blob(
-
-        [JSON.stringify(backup,null,2)],
-
-        {type:"application/json"}
 
     );
 
-    const link =
-    document.createElement("a");
+    const next = Math.max(...ids) + 1;
 
-    link.href =
-    URL.createObjectURL(blob);
+    return "SHP" + next;
 
-    link.download =
-    "INI_Logistics_Backup.json";
+}
+
+/*=========================================================
+    SHIPPING COST
+=========================================================*/
+
+function calculateShippingCost(weight, priority) {
+
+    weight = Number(weight);
+
+    if (isNaN(weight))
+        weight = 0;
+
+    let cost = weight * 80;
+
+    switch (priority) {
+
+        case "Express":
+
+            cost += 500;
+            break;
+
+        case "Urgent":
+
+            cost += 1000;
+            break;
+
+        case "Standard":
+
+        default:
+
+            cost += 200;
+            break;
+
+    }
+
+    return cost;
+
+}
+
+/*=========================================================
+    DELIVERY DATE
+=========================================================*/
+
+function calculateDeliveryDate(priority) {
+
+    const date = new Date();
+
+    switch (priority) {
+
+        case "Urgent":
+
+            date.setDate(date.getDate() + 1);
+            break;
+
+        case "Express":
+
+            date.setDate(date.getDate() + 3);
+            break;
+
+        default:
+
+            date.setDate(date.getDate() + 7);
+
+    }
+
+    return date.toISOString().split("T")[0];
+
+}
+
+/*=========================================================
+    STATUS HELPERS
+=========================================================*/
+
+function getStatusColor(status) {
+
+    switch (status) {
+
+        case STATUS.CREATED:
+            return "created";
+
+        case STATUS.PICKED:
+            return "picked";
+
+        case STATUS.TRANSIT:
+            return "transit";
+
+        case STATUS.DELIVERY:
+            return "delivery";
+
+        case STATUS.DELIVERED:
+            return "delivered";
+
+        default:
+            return "created";
+
+    }
+
+}
+
+function getStatusDescription(status) {
+
+    switch (status) {
+
+        case STATUS.CREATED:
+            return "Shipment has been created successfully.";
+
+        case STATUS.PICKED:
+            return "Shipment has been collected from sender.";
+
+        case STATUS.TRANSIT:
+            return "Shipment is currently in transit.";
+
+        case STATUS.DELIVERY:
+            return "Shipment is out for delivery.";
+
+        case STATUS.DELIVERED:
+            return "Shipment delivered successfully.";
+
+        default:
+            return "";
+
+    }
+
+}
+
+function getProgress(status) {
+
+    switch (status) {
+
+        case STATUS.CREATED:
+            return 20;
+
+        case STATUS.PICKED:
+            return 40;
+
+        case STATUS.TRANSIT:
+            return 60;
+
+        case STATUS.DELIVERY:
+            return 80;
+
+        case STATUS.DELIVERED:
+            return 100;
+
+        default:
+            return 0;
+
+    }
+
+}
+
+/*=========================================================
+    EXPORT HELPERS
+=========================================================*/
+
+function downloadFile(filename, content, type) {
+
+    const blob = new Blob(
+        [content],
+        { type: type }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+
+    document.body.appendChild(link);
 
     link.click();
 
-    showToast(
-        "Backup downloaded successfully."
-    );
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
 
 }
 
-/*=========================================
-    Clear Application Data
-=========================================*/
+function downloadCSV(filename, rows) {
 
-function clearApplicationData(){
+    if (!rows || rows.length === 0) {
 
-    if(!confirmAction(
-        "Delete all shipment and customer data?"
-    )) return;
+        showToast(
+            "No data available to export.",
+            "warning"
+        );
 
-    localStorage.removeItem("shipments");
-
-    localStorage.removeItem("customers");
-
-    showToast(
-        "Application data cleared.",
-        "warning"
-    );
-
-    setTimeout(()=>{
-
-        location.reload();
-
-    },1000);
-
-}
-
-/*=========================================
-    Keyboard Shortcuts
-=========================================*/
-
-document.addEventListener("keydown",(event)=>{
-
-    if(event.ctrlKey && event.key==="r"){
-
-        event.preventDefault();
-
-        refreshPage();
+        return;
 
     }
 
-    if(event.ctrlKey && event.key==="l"){
+    const headers = Object.keys(rows[0]);
 
-        event.preventDefault();
+    let csv = headers.join(",") + "\n";
 
-        logout();
+    rows.forEach(row => {
 
-    }
+        csv += headers.map(header => {
 
-});
+            return `"${row[header] ?? ""}"`;
 
-/*=========================================
-    Application Initializer
-=========================================*/
+        }).join(",");
 
-function initializeApplication(){
+        csv += "\n";
 
-    loadTheme();
+    });
 
-    hideLoader();
+    downloadFile(
 
-    console.log(
+        filename,
 
-        "%cINI Logistics v2.0",
+        csv,
 
-        "color:#0d6efd;font-size:18px;font-weight:bold"
+        "text/csv"
 
     );
 
 }
 
-window.addEventListener("load",initializeApplication);
+function downloadJSON(filename, data) {
 
-/*=========================================
-    Global Error Handler
-=========================================*/
+    downloadFile(
 
-window.onerror=function(message,file,line){
+        filename,
 
-    console.error(
+        JSON.stringify(data, null, 2),
 
-        "Application Error:",
-
-        message,
-
-        file,
-
-        line
+        "application/json"
 
     );
 
-    showToast(
+}
 
-        "Unexpected error occurred.",
+/*=========================================================
+    UUID GENERATOR
+=========================================================*/
 
-        "error"
+function uuid() {
 
-    );
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
-};
+        .replace(/[xy]/g, function(c){
 
-/*=========================================
-    Utility Helpers
-=========================================*/
+            const r = Math.random() * 16 | 0;
 
-function scrollToTop(){
+            const v =
+
+                c === "x"
+
+                ? r
+
+                : (r & 0x3 | 0x8);
+
+            return v.toString(16);
+
+        });
+
+}
+
+/*=========================================================
+    RANDOM NUMBER
+=========================================================*/
+
+function randomNumber(min, max){
+
+    return Math.floor(
+
+        Math.random()
+
+        * (max - min + 1)
+
+    ) + min;
+
+}
+
+/*=========================================================
+    DELAY
+=========================================================*/
+
+function delay(ms){
+
+    return new Promise(resolve => {
+
+        setTimeout(resolve, ms);
+
+    });
+
+}
+
+/*=========================================================
+    DEBOUNCE
+=========================================================*/
+
+function debounce(func, wait = 300){
+
+    let timeout;
+
+    return function(){
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+
+            func.apply(this, arguments);
+
+        }, wait);
+
+    };
+
+}
+
+/*=========================================================
+    COPY TO CLIPBOARD
+=========================================================*/
+
+async function copyToClipboard(text){
+
+    try{
+
+        await navigator.clipboard.writeText(text);
+
+        showToast(
+
+            "Copied to clipboard",
+
+            "success"
+
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        showToast(
+
+            "Copy failed",
+
+            "error"
+
+        );
+
+    }
+
+}
+
+/*=========================================================
+    SCROLL TO TOP
+=========================================================*/
+
+function scrollTopPage(){
 
     window.scrollTo({
 
@@ -688,29 +933,272 @@ function scrollToTop(){
 
 }
 
-function copyToClipboard(text){
+/*=========================================================
+    PRINT PAGE
+=========================================================*/
 
-    navigator.clipboard.writeText(text);
+function printPage(){
 
-    showToast(
-
-        "Copied to clipboard."
-
-    );
+    window.print();
 
 }
 
-/*=========================================
-    Version
-=========================================*/
+/*=========================================================
+    PAGE TITLE
+=========================================================*/
 
-const APP_VERSION = "2.0.0";
+function setPageTitle(title){
+
+    document.title =
+
+        title +
+
+        " | " +
+
+        APP.NAME;
+
+}
+
+/*=========================================================
+    FOOTER YEAR
+=========================================================*/
+
+function updateCopyrightYear(){
+
+    const year =
+
+        document.getElementById(
+
+            "currentYear"
+
+        );
+
+    if(year){
+
+        year.textContent =
+
+            new Date()
+
+            .getFullYear();
+
+    }
+
+}
+
+/*=========================================================
+    GLOBAL ERROR HANDLER
+=========================================================*/
+
+window.onerror = function(message, source, line, column, error){
+
+    console.error("Application Error");
+
+    console.error({
+
+        message,
+
+        source,
+
+        line,
+
+        column,
+
+        error
+
+    });
+
+    showToast(
+
+        "An unexpected error occurred.",
+
+        "error"
+
+    );
+
+    return false;
+
+};
+
+/*=========================================================
+    ONLINE / OFFLINE STATUS
+=========================================================*/
+
+window.addEventListener("online", () => {
+
+    showToast(
+
+        "Internet connection restored.",
+
+        "success"
+
+    );
+
+});
+
+window.addEventListener("offline", () => {
+
+    showToast(
+
+        "You are currently offline.",
+
+        "warning"
+
+    );
+
+});
+
+/*=========================================================
+    GLOBAL KEYBOARD SHORTCUTS
+=========================================================*/
+
+document.addEventListener("keydown", function(e){
+
+    /* ESC = Close loader */
+
+    if(e.key === "Escape"){
+
+        hideLoader();
+
+    }
+
+    /* Ctrl + P */
+
+    if(e.ctrlKey && e.key.toLowerCase() === "p"){
+
+        e.preventDefault();
+
+        printPage();
+
+    }
+
+    /* Ctrl + Home */
+
+    if(e.ctrlKey && e.key === "Home"){
+
+        e.preventDefault();
+
+        scrollTopPage();
+
+    }
+
+});
+
+/*=========================================================
+    VERIFY STORAGE
+=========================================================*/
+
+function verifyStorage(){
+
+    if(!localStorage.getItem(APP.STORAGE.SHIPMENTS)){
+
+        saveShipments([]);
+
+    }
+
+    if(!localStorage.getItem(APP.STORAGE.CUSTOMERS)){
+
+        saveCustomers([]);
+
+    }
+
+    if(!localStorage.getItem(APP.STORAGE.USERS)){
+
+        initializeUsers();
+
+    }
+
+}
+
+/*=========================================================
+    APP INITIALIZATION
+=========================================================*/
+
+function initApp(){
+
+    console.group(APP.NAME);
+
+    console.log("Version :", APP.VERSION);
+
+    console.log("Initializing application...");
+
+    verifyStorage();
+
+    checkLogin();
+
+    updateCopyrightYear();
+
+    hideLoader();
+
+    console.log("Initialization completed.");
+
+    console.groupEnd();
+
+}
+
+/*=========================================================
+    DOM READY
+=========================================================*/
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    initApp();
+
+});
+
+/*=========================================================
+    GLOBAL HELPERS
+=========================================================*/
+
+window.APP = APP;
+window.STATUS = STATUS;
+
+window.getShipments = getShipments;
+window.saveShipments = saveShipments;
+
+window.getCustomers = getCustomers;
+window.saveCustomers = saveCustomers;
+
+window.getUsers = getUsers;
+window.saveUsers = saveUsers;
+
+window.login = login;
+window.logout = logout;
+window.checkLogin = checkLogin;
+
+window.showToast = showToast;
+
+window.showLoader = showLoader;
+window.hideLoader = hideLoader;
+
+window.generateShipmentID = generateShipmentID;
+window.calculateShippingCost = calculateShippingCost;
+window.calculateDeliveryDate = calculateDeliveryDate;
+
+window.formatCurrency = formatCurrency;
+window.formatDate = formatDate;
+
+window.getStatusColor = getStatusColor;
+window.getStatusDescription = getStatusDescription;
+window.getProgress = getProgress;
+
+window.downloadCSV = downloadCSV;
+window.downloadJSON = downloadJSON;
+
+window.copyToClipboard = copyToClipboard;
+
+window.randomNumber = randomNumber;
+window.uuid = uuid;
+window.delay = delay;
+window.debounce = debounce;
+
+window.scrollTopPage = scrollTopPage;
+window.printPage = printPage;
+
+/*=========================================================
+    APPLICATION READY
+=========================================================*/
 
 console.log(
-    "INI Logistics Version:",
-    APP_VERSION
+    `${APP.NAME} v${APP.VERSION} Ready`
 );
 
-/*====================================================
-    End of main.js
-====================================================*/
