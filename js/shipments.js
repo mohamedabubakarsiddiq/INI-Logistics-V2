@@ -1,91 +1,175 @@
-/* =====================================================
-   INI Logistics - Shipment Management
-   Part 1
-=====================================================*/
+/*=========================================================
+    INI Logistics
+    Shipments Module
+    Version 2.1.0
+=========================================================*/
 
-// Global Variables
+"use strict";
+
+/*=========================================================
+    GLOBAL VARIABLES
+=========================================================*/
+
 let shipments = [];
 let filteredShipments = [];
 
-const STATUS = [
-    "Shipment Created",
-    "Picked Up",
-    "In Transit",
-    "Out For Delivery",
-    "Delivered"
-];
+let currentPage = 1;
+const rowsPerPage = 10;
 
-// ---------------------------
-// Load Shipments
-// ---------------------------
+/*=========================================================
+    DOM ELEMENTS
+=========================================================*/
+
+let shipmentTableBody;
+
+let totalShipmentsCard;
+let deliveredCard;
+let transitCard;
+let pendingCard;
+let revenueCard;
+
+let totalRecords;
+
+/*=========================================================
+    CACHE ELEMENTS
+=========================================================*/
+
+function cacheElements() {
+
+    shipmentTableBody =
+        document.getElementById("shipmentTableBody");
+
+    totalShipmentsCard =
+        document.getElementById("totalShipments");
+
+    deliveredCard =
+        document.getElementById("deliveredShipments");
+
+    transitCard =
+        document.getElementById("transitShipments");
+
+    pendingCard =
+        document.getElementById("pendingShipments");
+
+    revenueCard =
+        document.getElementById("totalRevenue");
+
+    totalRecords =
+        document.getElementById("totalRecords");
+
+}
+
+/*=========================================================
+    LOAD SHIPMENTS
+=========================================================*/
+
 function loadShipments() {
 
-    shipments =
-        JSON.parse(localStorage.getItem("shipments")) || [];
+    shipments = getShipments();
 
     filteredShipments = [...shipments];
 
-    document.getElementById("shipmentCount").textContent =
-        shipments.length;
+    updateStatistics();
 
-    renderTable(filteredShipments);
+    renderTable();
 
 }
 
-// ---------------------------
-// Render Table
-// ---------------------------
-function renderTable(data) {
+/*=========================================================
+    UPDATE DASHBOARD CARDS
+=========================================================*/
 
-    const table =
-        document.getElementById("shipmentTable");
+function updateStatistics() {
 
-    if (!table) return;
+    const total = shipments.length;
 
-    table.innerHTML = "";
+    const delivered = shipments.filter(
 
-    if (data.length === 0) {
+        shipment => shipment.status === STATUS.DELIVERED
 
-        table.innerHTML = `
-        <tr>
-            <td colspan="12">
-                <div class="empty-state">
-                    📦
-                    <h3>No Shipments Found</h3>
-                    <p>Create your first shipment.</p>
-                </div>
+    ).length;
+
+    const transit = shipments.filter(
+
+        shipment => shipment.status === STATUS.TRANSIT
+
+    ).length;
+
+    const pending = shipments.filter(
+
+        shipment => shipment.status !== STATUS.DELIVERED
+
+    ).length;
+
+    const revenue = shipments.reduce(
+
+        (sum, shipment) => sum + Number(shipment.cost),
+
+        0
+
+    );
+
+    if (totalShipmentsCard)
+        totalShipmentsCard.textContent = total;
+
+    if (deliveredCard)
+        deliveredCard.textContent = delivered;
+
+    if (transitCard)
+        transitCard.textContent = transit;
+
+    if (pendingCard)
+        pendingCard.textContent = pending;
+
+    if (revenueCard)
+        revenueCard.textContent = formatCurrency(revenue);
+
+}
+
+/*=========================================================
+    RENDER TABLE
+=========================================================*/
+
+function renderTable() {
+
+    shipmentTableBody.innerHTML = "";
+
+    if (filteredShipments.length === 0) {
+
+        shipmentTableBody.innerHTML =
+
+        `<tr>
+
+            <td colspan="10" class="text-center">
+
+                No shipments found.
+
             </td>
-        </tr>
-        `;
+
+        </tr>`;
+
+        if (totalRecords)
+            totalRecords.textContent = "0";
 
         return;
+
     }
 
-    data.forEach((shipment, index) => {
+    const start =
 
-        table.innerHTML += renderShipmentRow(
-            shipment,
-            index
-        );
+        (currentPage - 1) * rowsPerPage;
 
-    });
+    const end =
 
-    document
-        .querySelectorAll(".status-dropdown")
-        .forEach(setStatusColor);
+        start + rowsPerPage;
 
-}
+    const pageData =
 
-// ---------------------------
-// Render Single Row
-// ---------------------------
-function renderShipmentRow(shipment, index) {
+        filteredShipments.slice(start, end);
 
-    const cost =
-        Number(shipment.cost || 0)
-        .toLocaleString("en-IN");
+    pageData.forEach(shipment => {
 
-    return `
+        shipmentTableBody.innerHTML += `
 
 <tr>
 
@@ -99,70 +183,45 @@ function renderShipmentRow(shipment, index) {
 
 <td>${shipment.destination}</td>
 
-<td>${shipment.packageType || "-"}</td>
+<td>${shipment.priority}</td>
 
-<td>${shipment.weight} KG</td>
-
-<td>${shipment.priority || "-"}</td>
-
-<td>₹${cost}</td>
-
-<td>${shipment.estimatedDelivery || "-"}</td>
+<td>${formatCurrency(shipment.cost)}</td>
 
 <td>
 
-<select
-class="status-dropdown"
-onchange="updateStatus(${index},this)">
+<span class="status-badge ${getStatusColor(shipment.status)}">
 
-${STATUS.map(status => `
+${shipment.status}
 
-<option
-value="${status}"
-${shipment.status===status ? "selected":""}>
-
-${status}
-
-</option>
-
-`).join("")}
-
-</select>
-
-<div class="progress-wrapper">
-
-${createProgressBar(shipment.status)}
-
-</div>
+</span>
 
 </td>
 
+<td>${formatDate(shipment.bookingDate)}</td>
+
 <td>
 
 <button
-class="icon-btn view-btn"
-title="View Shipment"
-onclick="viewShipment(${index})">
+class="table-btn view-btn"
+onclick="viewShipment('${shipment.id}')">
 
-👁
-
-</button>
-
-<button
-class="icon-btn edit-btn"
-title="Edit Shipment"
-onclick="editShipment(${index})">
-
-✏️
+View
 
 </button>
 
 <button
-class="icon-btn delete-btn"
-title="Delete Shipment"
-onclick="deleteShipment(${index})">
+class="table-btn edit-btn"
+onclick="editShipment('${shipment.id}')">
 
-🗑
+Edit
+
+</button>
+
+<button
+class="table-btn delete-btn"
+onclick="deleteShipment('${shipment.id}')">
+
+Delete
 
 </button>
 
@@ -172,119 +231,226 @@ onclick="deleteShipment(${index})">
 
 `;
 
-}
+    });
 
-// ---------------------------
-// Update Status
-// ---------------------------
-function updateStatus(index, element) {
+    if (totalRecords)
 
-    shipments[index].status =
-        element.value;
+        totalRecords.textContent =
 
-    localStorage.setItem(
-        "shipments",
-        JSON.stringify(shipments)
-    );
+        filteredShipments.length;
 
-    setStatusColor(element);
-
-    loadShipments();
-
-    showToast("Shipment updated successfully.");
+    renderPagination();
 
 }
 
-// ---------------------------
-// Delete Shipment
-// ---------------------------
-function deleteShipment(index) {
+/*=========================================================
+    PAGINATION
+=========================================================*/
 
-    if (!confirm(
-        "Delete this shipment?"
-    )) return;
+function renderPagination() {
 
-    shipments.splice(index, 1);
+    const pagination =
 
-    localStorage.setItem(
-        "shipments",
-        JSON.stringify(shipments)
-    );
+        document.getElementById("pagination");
 
-    loadShipments();
+    if (!pagination)
+        return;
 
-    showToast("Shipment deleted.");
+    pagination.innerHTML = "";
 
-}
+    const totalPages =
 
-// ---------------------------
-// Search Shipment
-// ---------------------------
-function searchShipment() {
+        Math.ceil(
 
-    const keyword =
-        document
-        .getElementById("searchBox")
-        .value
-        .toLowerCase();
+            filteredShipments.length /
 
-    filteredShipments =
-        shipments.filter(shipment =>
-
-            shipment.id.toLowerCase().includes(keyword)
-
-            ||
-
-            shipment.sender.toLowerCase().includes(keyword)
-
-            ||
-
-            shipment.receiver.toLowerCase().includes(keyword)
+            rowsPerPage
 
         );
 
-    renderTable(filteredShipments);
+    for (
 
-}
+        let page = 1;
 
-/* =====================================================
-   INI Logistics - Shipment Management
-   Part 2
-=====================================================*/
+        page <= totalPages;
 
-// ---------------------------
-// Filter Shipments
-// ---------------------------
-function filterShipments() {
+        page++
 
-    const status = document
-        .getElementById("statusFilter")
-        .value;
+    ) {
 
-    if (status === "") {
-        filteredShipments = [...shipments];
-    } else {
-        filteredShipments = shipments.filter(
-            shipment => shipment.status === status
-        );
+        pagination.innerHTML += `
+
+<button
+
+class="page-btn ${page===currentPage?"active":""}"
+
+onclick="changePage(${page})">
+
+${page}
+
+</button>
+
+`;
+
     }
 
-    renderTable(filteredShipments);
+}
+
+function changePage(page){
+
+    currentPage = page;
+
+    renderTable();
 
 }
 
-// ---------------------------
-// View Shipment
-// ---------------------------
-function viewShipment(index) {
+/*=========================================================
+    SEARCH & FILTER
+=========================================================*/
 
-    const shipment = shipments[index];
+function applyFilters() {
 
-    alert(
+    const search =
+        document.getElementById("searchShipment")?.value
+        .trim()
+        .toLowerCase() || "";
 
-`Shipment Details
+    const status =
+        document.getElementById("filterStatus")?.value || "";
 
-Shipment ID : ${shipment.id}
+    const priority =
+        document.getElementById("filterPriority")?.value || "";
+
+    filteredShipments = shipments.filter(shipment => {
+
+        const matchesSearch =
+
+            shipment.id.toLowerCase().includes(search) ||
+
+            shipment.sender.toLowerCase().includes(search) ||
+
+            shipment.receiver.toLowerCase().includes(search) ||
+
+            shipment.origin.toLowerCase().includes(search) ||
+
+            shipment.destination.toLowerCase().includes(search);
+
+        const matchesStatus =
+
+            !status ||
+
+            shipment.status === status;
+
+        const matchesPriority =
+
+            !priority ||
+
+            shipment.priority === priority;
+
+        return (
+
+            matchesSearch &&
+
+            matchesStatus &&
+
+            matchesPriority
+
+        );
+
+    });
+
+    currentPage = 1;
+
+    renderTable();
+
+}
+
+/*=========================================================
+    RESET FILTERS
+=========================================================*/
+
+function resetFilters() {
+
+    const search =
+        document.getElementById("searchShipment");
+
+    const status =
+        document.getElementById("filterStatus");
+
+    const priority =
+        document.getElementById("filterPriority");
+
+    if(search) search.value = "";
+
+    if(status) status.value = "";
+
+    if(priority) priority.value = "";
+
+    filteredShipments = [...shipments];
+
+    currentPage = 1;
+
+    renderTable();
+
+}
+
+/*=========================================================
+    SORTING
+=========================================================*/
+
+function sortShipments(field) {
+
+    filteredShipments.sort((a,b)=>{
+
+        const valueA = a[field];
+
+        const valueB = b[field];
+
+        if(typeof valueA === "number"){
+
+            return valueA-valueB;
+
+        }
+
+        return valueA
+            .toString()
+            .localeCompare(valueB);
+
+    });
+
+    renderTable();
+
+}
+
+/*=========================================================
+    VIEW SHIPMENT
+=========================================================*/
+
+function viewShipment(id){
+
+    const shipment = shipments.find(
+
+        s => s.id === id
+
+    );
+
+    if(!shipment){
+
+        showToast(
+
+            "Shipment not found.",
+
+            "error"
+
+        );
+
+        return;
+
+    }
+
+    const message =
+
+`Shipment ID : ${shipment.id}
 
 Sender : ${shipment.sender}
 
@@ -294,251 +460,560 @@ Origin : ${shipment.origin}
 
 Destination : ${shipment.destination}
 
-Package Type : ${shipment.packageType}
+Package : ${shipment.packageType}
 
-Weight : ${shipment.weight} KG
+Weight : ${shipment.weight} kg
 
 Priority : ${shipment.priority}
 
-Cost : ₹${Number(shipment.cost || 0).toLocaleString("en-IN")}
+Cost : ${formatCurrency(shipment.cost)}
 
-ETA : ${shipment.estimatedDelivery}
+Booking Date : ${formatDate(shipment.bookingDate)}
 
-Status : ${shipment.status}`
+Estimated Delivery : ${formatDate(shipment.estimatedDelivery)}
 
-    );
+Status : ${shipment.status}`;
 
-}
-
-// ---------------------------
-// Edit Shipment
-// ---------------------------
-function editShipment(index){
-
-    localStorage.setItem(
-        "editShipmentIndex",
-        index
-    );
-
-    window.location.href =
-        "shipment.html";
+    alert(message);
 
 }
 
-// ---------------------------
-// Export CSV
-// ---------------------------
-function exportCSV(){
+/*=========================================================
+    STATUS UPDATE
+=========================================================*/
 
-    if(shipments.length===0){
+function updateShipmentStatus(id,status){
 
-        alert("No shipment data available.");
+    const shipment = shipments.find(
 
-        return;
+        s => s.id === id
 
-    }
+    );
 
-    let csv =
-"Shipment ID,Sender,Receiver,Origin,Destination,Weight,Priority,Cost,Status\n";
+    if(!shipment) return;
 
-    shipments.forEach(shipment=>{
+    shipment.status = status;
 
-        csv +=
-`${shipment.id},
-${shipment.sender},
-${shipment.receiver},
-${shipment.origin},
-${shipment.destination},
-${shipment.weight},
-${shipment.priority},
-${shipment.cost},
-${shipment.status}\n`;
+    shipment.trackingHistory.push({
+
+        status,
+
+        date:new Date().toLocaleString(),
+
+        location:shipment.destination,
+
+        remarks:getStatusDescription(status)
 
     });
 
-    const blob =
-        new Blob(
-            [csv],
-            {
-                type:"text/csv"
-            }
-        );
-
-    const url =
-        URL.createObjectURL(blob);
-
-    const a =
-        document.createElement("a");
-
-    a.href = url;
-
-    a.download =
-        "INI_Logistics_Shipments.csv";
-
-    a.click();
-
-}
-
-// ---------------------------
-// Export Excel
-// ---------------------------
-function exportToExcel(){
-
-    exportCSV();
-
-}
-
-// ---------------------------
-// Status Colors
-// ---------------------------
-function setStatusColor(select){
-
-    select.classList.remove(
-        "created",
-        "picked",
-        "transit",
-        "delivery",
-        "delivered"
-    );
-
-    switch(select.value){
-
-        case "Shipment Created":
-
-            select.classList.add("created");
-
-            break;
-
-        case "Picked Up":
-
-            select.classList.add("picked");
-
-            break;
-
-        case "In Transit":
-
-            select.classList.add("transit");
-
-            break;
-
-        case "Out For Delivery":
-
-            select.classList.add("delivery");
-
-            break;
-
-        case "Delivered":
-
-            select.classList.add("delivered");
-
-            break;
-
-    }
-
-}
-
-// ---------------------------
-// Progress Bar
-// ---------------------------
-function createProgressBar(status){
-
-    const progress = {
-
-        "Shipment Created":20,
-
-        "Picked Up":40,
-
-        "In Transit":60,
-
-        "Out For Delivery":80,
-
-        "Delivered":100
-
-    };
-
-    return `
-
-<div class="progress">
-
-<div
-class="progress-fill"
-style="width:${progress[status] || 0}%">
-
-</div>
-
-</div>
-
-`;
-
-}
-
-// ---------------------------
-// Toast Notification
-// ---------------------------
-function showToast(message){
-
-    const toast =
-        document.getElementById("toast");
-
-    if(!toast){
-
-        console.log(message);
-
-        return;
-
-    }
-
-    toast.innerHTML = message;
-
-    toast.classList.add("show");
-
-    setTimeout(()=>{
-
-        toast.classList.remove("show");
-
-    },3000);
-
-}
-
-// ---------------------------
-// Sort by Column
-// ---------------------------
-function sortShipments(column){
-
-    filteredShipments.sort((a,b)=>{
-
-        return String(a[column])
-            .localeCompare(
-                String(b[column])
-            );
-
-    });
-
-    renderTable(filteredShipments);
-
-}
-
-// ---------------------------
-// Pagination (Ready)
-// ---------------------------
-
-const rowsPerPage = 10;
-
-let currentPage = 1;
-
-function changePage(page){
-
-    currentPage = page;
-
-    renderTable(filteredShipments);
-
-}
-
-// ---------------------------
-// Initialize
-// ---------------------------
-window.onload = function(){
+    saveShipments(shipments);
 
     loadShipments();
 
-};
+    showToast(
+
+        "Shipment status updated.",
+
+        "success"
+
+    );
+
+}
+
+/*=========================================================
+    REGISTER EVENTS
+=========================================================*/
+
+function registerFilterEvents(){
+
+    const search =
+        document.getElementById("searchShipment");
+
+    const status =
+        document.getElementById("filterStatus");
+
+    const priority =
+        document.getElementById("filterPriority");
+
+    if(search){
+
+        search.addEventListener(
+
+            "input",
+
+            debounce(applyFilters,300)
+
+        );
+
+    }
+
+    if(status){
+
+        status.addEventListener(
+
+            "change",
+
+            applyFilters
+
+        );
+
+    }
+
+    if(priority){
+
+        priority.addEventListener(
+
+            "change",
+
+            applyFilters
+
+        );
+
+    }
+
+}
+
+/*=========================================================
+    EDIT SHIPMENT
+=========================================================*/
+
+function editShipment(id) {
+
+    const shipment = shipments.find(s => s.id === id);
+
+    if (!shipment) {
+
+        showToast("Shipment not found.", "error");
+        return;
+
+    }
+
+    const sender = prompt("Sender Name:", shipment.sender);
+    if (sender === null) return;
+
+    const receiver = prompt("Receiver Name:", shipment.receiver);
+    if (receiver === null) return;
+
+    const origin = prompt("Origin:", shipment.origin);
+    if (origin === null) return;
+
+    const destination = prompt("Destination:", shipment.destination);
+    if (destination === null) return;
+
+    shipment.sender = capitalize(sanitize(sender));
+    shipment.receiver = capitalize(sanitize(receiver));
+    shipment.origin = capitalize(sanitize(origin));
+    shipment.destination = capitalize(sanitize(destination));
+
+    saveShipments(shipments);
+
+    loadShipments();
+
+    showToast(
+        "Shipment updated successfully.",
+        "success"
+    );
+
+}
+
+/*=========================================================
+    DELETE SHIPMENT
+=========================================================*/
+
+function deleteShipment(id) {
+
+    const shipment = shipments.find(s => s.id === id);
+
+    if (!shipment) {
+
+        showToast("Shipment not found.", "error");
+        return;
+
+    }
+
+    if (!confirm(
+        `Delete shipment ${id}?`
+    )) return;
+
+    shipments = shipments.filter(
+
+        shipment => shipment.id !== id
+
+    );
+
+    saveShipments(shipments);
+
+    loadShipments();
+
+    showToast(
+
+        "Shipment deleted successfully.",
+
+        "success"
+
+    );
+
+}
+
+/*=========================================================
+    REFRESH TABLE
+=========================================================*/
+
+function refreshTable() {
+
+    shipments = getShipments();
+
+    filteredShipments = [...shipments];
+
+    updateStatistics();
+
+    renderTable();
+
+}
+
+/*=========================================================
+    EXPORT CSV
+=========================================================*/
+
+function exportCSV() {
+
+    if (shipments.length === 0) {
+
+        showToast(
+
+            "No shipments available.",
+
+            "warning"
+
+        );
+
+        return;
+
+    }
+
+    downloadCSV(
+
+        "shipments.csv",
+
+        shipments
+
+    );
+
+}
+
+/*=========================================================
+    EXPORT JSON
+=========================================================*/
+
+function exportJSON() {
+
+    if (shipments.length === 0) {
+
+        showToast(
+
+            "No shipments available.",
+
+            "warning"
+
+        );
+
+        return;
+
+    }
+
+    downloadJSON(
+
+        "shipments.json",
+
+        shipments
+
+    );
+
+}
+
+/*=========================================================
+    PRINT SHIPMENTS
+=========================================================*/
+
+function printShipments() {
+
+    window.print();
+
+}
+
+/*=========================================================
+    UPDATE STATISTICS
+=========================================================*/
+
+function refreshDashboard() {
+
+    updateStatistics();
+
+    renderTable();
+
+}
+
+/*=========================================================
+    ACTION BUTTONS
+=========================================================*/
+
+function registerActionButtons() {
+
+    const exportCsvBtn =
+        document.getElementById("exportCSV");
+
+    const exportJsonBtn =
+        document.getElementById("exportJSON");
+
+    const refreshBtn =
+        document.getElementById("refreshTable");
+
+    const printBtn =
+        document.getElementById("printTable");
+
+    if (exportCsvBtn) {
+
+        exportCsvBtn.addEventListener(
+
+            "click",
+
+            exportCSV
+
+        );
+
+    }
+
+    if (exportJsonBtn) {
+
+        exportJsonBtn.addEventListener(
+
+            "click",
+
+            exportJSON
+
+        );
+
+    }
+
+    if (refreshBtn) {
+
+        refreshBtn.addEventListener(
+
+            "click",
+
+            refreshTable
+
+        );
+
+    }
+
+    if (printBtn) {
+
+        printBtn.addEventListener(
+
+            "click",
+
+            printShipments
+
+        );
+
+    }
+
+}
+
+/*=========================================================
+    PREVIOUS PAGE
+=========================================================*/
+
+function previousPage() {
+
+    if (currentPage > 1) {
+
+        currentPage--;
+
+        renderTable();
+
+    }
+
+}
+
+/*=========================================================
+    NEXT PAGE
+=========================================================*/
+
+function nextPage() {
+
+    const totalPages = Math.ceil(
+
+        filteredShipments.length / rowsPerPage
+
+    );
+
+    if (currentPage < totalPages) {
+
+        currentPage++;
+
+        renderTable();
+
+    }
+
+}
+
+/*=========================================================
+    EMPTY STATE
+=========================================================*/
+
+function checkEmptyState() {
+
+    const emptyState =
+        document.getElementById("emptyState");
+
+    if (!emptyState)
+        return;
+
+    if (filteredShipments.length === 0) {
+
+        emptyState.style.display = "block";
+
+    }
+
+    else {
+
+        emptyState.style.display = "none";
+
+    }
+
+}
+
+/*=========================================================
+    KEYBOARD SHORTCUTS
+=========================================================*/
+
+function registerKeyboardShortcuts() {
+
+    document.addEventListener("keydown", function (e) {
+
+        /* Ctrl + F */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "f") {
+
+            e.preventDefault();
+
+            document.getElementById(
+
+                "searchShipment"
+
+            )?.focus();
+
+        }
+
+        /* Ctrl + R */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "r") {
+
+            e.preventDefault();
+
+            refreshTable();
+
+        }
+
+        /* Ctrl + E */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "e") {
+
+            e.preventDefault();
+
+            exportCSV();
+
+        }
+
+        /* Ctrl + J */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "j") {
+
+            e.preventDefault();
+
+            exportJSON();
+
+        }
+
+        /* Ctrl + P */
+
+        if (e.ctrlKey && e.key.toLowerCase() === "p") {
+
+            e.preventDefault();
+
+            printShipments();
+
+        }
+
+    });
+
+}
+
+/*=========================================================
+    AUTO REFRESH
+=========================================================*/
+
+function startAutoRefresh() {
+
+    setInterval(function () {
+
+        shipments = getShipments();
+
+        filteredShipments = [...shipments];
+
+        updateStatistics();
+
+        renderTable();
+
+        checkEmptyState();
+
+    }, 30000);
+
+}
+
+/*=========================================================
+    INITIALIZE PAGE
+=========================================================*/
+
+function initializeShipmentsPage() {
+
+    checkLogin();
+
+    cacheElements();
+
+    loadShipments();
+
+    registerFilterEvents();
+
+    registerActionButtons();
+
+    registerKeyboardShortcuts();
+
+    checkEmptyState();
+
+    startAutoRefresh();
+
+    console.log(
+
+        "INI Logistics Shipments Module v2.1 Loaded"
+
+    );
+
+}
+
+/*=========================================================
+    START APPLICATION
+=========================================================*/
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    initializeShipmentsPage
+
+);
+
+
+
